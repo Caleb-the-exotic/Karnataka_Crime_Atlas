@@ -35,7 +35,6 @@ function InvestigationHub() {
   const [tab, setTab] = useState("overview");
   return (
     <div className="space-y-6">
-      <Breadcrumbs items={[{ label: "Home" }, { label: "Investigation Hub" }]} />
       <HubTabs tabs={TABS} value={tab} onChange={setTab} />
 
       <TabPanel active={tab === "overview"}>
@@ -43,6 +42,7 @@ function InvestigationHub() {
           <PageHeader
             eyebrow="INVESTIGATION"
             title="Investigation Hub"
+            titleStyle={{ fontFamily: '"Geist", sans-serif' }}
             description="Unified investigative workspace consolidating Cases, Suspects, Victims and Network analysis."
             actions={<Chip tone="primary">{cases.length} active cases</Chip>}
           />

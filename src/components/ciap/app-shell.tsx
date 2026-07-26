@@ -2,12 +2,11 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import {
   LayoutDashboard, Map as MapIcon, FolderSearch, Brain, FileText, Sparkles, Flame, BarChart3,
-  Upload, Settings, Bell, Shield, Command, CircleDot, Radio,
-  CloudSun, Activity, Zap, ChevronRight, Keyboard,
-  X, Send,
+  Upload, Settings, Bell, Command, CircleDot,
+  Activity, Zap, ChevronRight, Keyboard,
+  X, Send, Menu, LogIn, ChevronLeft, ChevronRight as ChevronRightIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { liveAlerts } from "@/lib/ciap-data";
 import { useI18n } from "@/lib/ciap/i18n";
 import { Toaster } from "@/components/ui/sonner";
 import { districtGeo, incidents, crimeCategoryList, hotspots } from "@/lib/ciap/geo";
@@ -24,11 +23,35 @@ const nav = [
 
 type NavRoute = (typeof nav)[number]["to"];
 
+/* ------------------------------------------------------------------ Auth */
+
+interface User {
+  name: string;
+  email: string;
+  avatar: string;
+  initials: string;
+}
+
+function useAuth() {
+  const [user, setUser] = useState<User | null>(null);
+  const login = () => {
+    // Simulate Google OAuth — in production replace with real OAuth flow
+    setUser({ name: "DIG R. Kumar", email: "r.kumar@ksp.gov.in", avatar: "", initials: "DR" });
+  };
+  const logout = () => setUser(null);
+  return { user, login, logout };
+}
+
+/* ---------------------------------------------------------------- Shell */
+
 export function AppShell({ children }: { children: ReactNode }) {
   const [now, setNow] = useState(() => new Date());
   const [cmdOpen, setCmdOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
   const [aiOpen, setAiOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [loginOpen, setLoginOpen] = useState(false);
+  const auth = useAuth();
   const navigate = useNavigate();
   const goto = useMemo(() => (to: string) => navigate({ to: to as NavRoute }), [navigate]);
 
@@ -65,50 +88,132 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="relative min-h-screen w-full text-foreground">
-      <TopBar now={now} onCmd={() => setCmdOpen(true)} onHelp={() => setHelpOpen(true)} onAi={() => setAiOpen(true)} />
+      <TopBar
+        now={now}
+        onCmd={() => setCmdOpen(true)}
+        onHelp={() => setHelpOpen(true)}
+        onAi={() => setAiOpen(true)}
+        sidebarOpen={sidebarOpen}
+        onToggleSidebar={() => setSidebarOpen((v) => !v)}
+        user={auth.user}
+        onLoginClick={() => setLoginOpen(true)}
+        onLogout={auth.logout}
+      />
       <div className="relative z-10 flex w-full pt-16">
-        <Sidebar now={now} />
+        <Sidebar now={now} open={sidebarOpen} />
         <main id="main" className="flex-1 min-w-0 px-6 py-6">{children}</main>
-        <RightPanel />
       </div>
       {cmdOpen && <CommandPalette onClose={() => setCmdOpen(false)} onNavigate={(to) => { setCmdOpen(false); goto(to); }} onAskAI={(q) => { setCmdOpen(false); setAiOpen(true); (window as any).__ciapAI?.ask?.(q); }} />}
       {helpOpen && <ShortcutsModal onClose={() => setHelpOpen(false)} />}
+      {loginOpen && <LoginModal onClose={() => setLoginOpen(false)} onLogin={() => { auth.login(); setLoginOpen(false); }} />}
       <FloatingAI open={aiOpen} onOpenChange={setAiOpen} />
       <Toaster richColors position="top-right" theme="system" />
     </div>
   );
 }
 
-function TopBar({ now, onCmd, onHelp, onAi }: { now: Date; onCmd: () => void; onHelp: () => void; onAi: () => void }) {
-  const { t } = useI18n();
+/* --------------------------------------------------------------- TopBar */
+
+interface TopBarProps {
+  now: Date;
+  onCmd: () => void;
+  onHelp: () => void;
+  onAi: () => void;
+  sidebarOpen: boolean;
+  onToggleSidebar: () => void;
+  user: User | null;
+  onLoginClick: () => void;
+  onLogout: () => void;
+}
+
+function TopBar({ now, onCmd, onHelp, onAi, sidebarOpen, onToggleSidebar, user, onLoginClick, onLogout }: TopBarProps) {
+  const [profileOpen, setProfileOpen] = useState(false);
+
   return (
     <header className="fixed inset-x-0 top-0 z-40 h-16 border-b border-border/60 backdrop-blur-2xl bg-background/70">
-      <div className="flex h-full items-center gap-4 px-4">
-        <div className="flex items-center gap-3">
-          <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary/30 to-accent/20 border border-primary/40 glow-primary">
-            <Shield className="h-5 w-5 text-primary" />
-            <span className="absolute inset-0 rounded-xl border border-primary/40 animate-pulse-ring" />
-          </div>
-          <div className="leading-tight">
-            <div className="text-[10px] tracking-[0.3em] text-muted-foreground uppercase">{t("app.org")}</div>
-            <div className="text-sm font-semibold tracking-wide text-glow">CIAP <span className="text-muted-foreground font-normal">{t("app.title")}</span></div>
-          </div>
+      <div className="flex h-full items-center gap-3 px-4">
+
+        {/* Hamburger */}
+        <button
+          onClick={onToggleSidebar}
+          aria-label={sidebarOpen ? "Close sidebar" : "Open sidebar"}
+          className="rounded-xl border border-border/60 p-2 hover:border-primary/60 hover:bg-primary/10 transition"
+        >
+          <Menu className="h-4 w-4" />
+        </button>
+
+        {/* Centre title */}
+        <div className="flex-1 flex items-center justify-center gap-2 select-none pointer-events-none">
+          <ChevronLeft className="h-4 w-4 text-primary/60" />
+          <span className="italic font-semibold tracking-wide text-base text-glow" style={{ fontFamily: '"Geist", sans-serif' }}>Karnataka CIAP</span>
+          <ChevronRightIcon className="h-4 w-4 text-primary/60" />
         </div>
 
-        <div className="flex-1" />
+        {/* User area */}
+        {user ? (
+          <div className="relative">
+            <button
+              onClick={() => setProfileOpen((v) => !v)}
+              className="flex items-center gap-2 rounded-xl border border-border/60 bg-card/60 pl-2 pr-3 py-1.5 hover:border-primary/50 transition"
+            >
+              <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-primary to-accent grid place-items-center text-[11px] font-bold text-primary-foreground">
+                {user.initials}
+              </div>
+              <div className="hidden md:block text-xs leading-tight text-left">
+                <div className="font-medium">{user.name}</div>
+                <div className="text-muted-foreground text-[10px]">SCRB · Cmd Ctr</div>
+              </div>
+            </button>
+            {profileOpen && (
+              <div className="absolute right-0 top-full mt-2 w-52 rounded-2xl border border-border/60 bg-popover/95 backdrop-blur-xl shadow-xl p-2 z-50">
+                <div className="px-3 py-2 text-xs text-muted-foreground border-b border-border/40 mb-1">{user.email}</div>
+                <button
+                  onClick={() => { setProfileOpen(false); onLogout(); }}
+                  className="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-secondary/60 text-destructive transition"
+                >
+                  Sign out
+                </button>
+              </div>
+            )}
+          </div>
+        ) : (
+          <button
+            onClick={onLoginClick}
+            className="flex items-center gap-2 rounded-xl border border-primary/40 bg-primary/10 px-3 py-2 text-sm text-primary hover:bg-primary/20 transition"
+          >
+            <LogIn className="h-4 w-4" />
+            <span className="hidden sm:inline">Login</span>
+          </button>
+        )}
       </div>
     </header>
   );
 }
 
-function Sidebar({ now }: { now: Date }) {
+/* We need ChevronLeft locally */
+function ChevronLeft({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="15 18 9 12 15 6" />
+    </svg>
+  );
+}
+
+/* -------------------------------------------------------------- Sidebar */
+
+function Sidebar({ now, open }: { now: Date; open: boolean }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const time = now.toLocaleTimeString("en-IN", { hour12: false });
   const date = now.toLocaleDateString("en-IN", { weekday: "short", day: "2-digit", month: "short", year: "numeric" });
+
   return (
-    <aside className="sticky top-16 h-[calc(100vh-4rem)] w-64 shrink-0 border-r border-border/60 bg-sidebar/60 backdrop-blur-xl flex flex-col">
+    <aside
+      className={cn(
+        "sticky top-16 h-[calc(100vh-4rem)] shrink-0 border-r border-border/60 bg-sidebar/60 backdrop-blur-xl flex flex-col transition-all duration-300 overflow-hidden",
+        open ? "w-64" : "w-0 border-r-0"
+      )}
+    >
       <nav className="flex-1 flex flex-col gap-0.5 p-3 overflow-y-auto">
-        <div className="px-2 py-2 text-[10px] tracking-[0.25em] text-muted-foreground uppercase">Command Modules</div>
         {nav.map(({ to, label, icon: Icon }) => {
           const active = pathname === to;
           return (
@@ -116,126 +221,147 @@ function Sidebar({ now }: { now: Date }) {
               key={to}
               to={to}
               className={cn(
-                "group relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition",
+                "group relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition whitespace-nowrap",
                 active
                   ? "bg-primary/15 text-primary border border-primary/30"
                   : "text-sidebar-foreground/80 hover:bg-sidebar-accent/70 hover:text-sidebar-foreground border border-transparent"
               )}
             >
               {active && <span className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-0.5 bg-primary rounded-full glow-primary" />}
-              <Icon className="h-4 w-4" />
+              <Icon className="h-4 w-4 shrink-0" />
               <span className="flex-1">{label}</span>
-              {active && <ChevronRight className="h-3.5 w-3.5 opacity-60" />}
+              {active && <ChevronRightIcon className="h-3.5 w-3.5 opacity-60 shrink-0" />}
             </Link>
           );
         })}
       </nav>
 
-      <div className="p-4 border-t border-border/60 bg-sidebar-accent/10 space-y-3">
-        {/* Time clock — shown first */}
-        <div className="flex flex-col px-1 pb-1">
-          <span className="font-mono text-primary text-glow text-sm font-semibold">{time} IST</span>
-          <span className="text-muted-foreground text-[11px]">{date}</span>
+      <div className="p-3 border-t border-border/60 bg-sidebar-accent/10">
+        {/* Clock + Notifications on one row */}
+        <div className="flex items-center gap-2 min-w-0">
+          <div className="flex flex-col flex-1 min-w-0">
+            <span className="font-mono text-primary text-glow text-sm font-semibold whitespace-nowrap">{time} IST</span>
+            <span className="text-muted-foreground text-[11px] whitespace-nowrap">{date}</span>
+          </div>
+          <button className="relative shrink-0 rounded-xl border border-border/60 bg-card/60 p-2 text-sidebar-foreground/80 hover:text-sidebar-foreground hover:bg-sidebar-accent/70 hover:border-primary/50 transition">
+            <Bell className="h-4 w-4" />
+            <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-destructive text-[9px] flex items-center justify-center text-destructive-foreground font-bold">7</span>
+          </button>
+        </div>
+      </div>
+    </aside>
+  );
+}
+
+/* ------------------------------------------------------------- Login Modal */
+
+function LoginModal({ onClose, onLogin }: { onClose: () => void; onLogin: () => void }) {
+  return (
+    <div
+      className="fixed inset-0 z-50 grid place-items-center bg-background/70 backdrop-blur-sm"
+      onClick={onClose}
+      role="dialog"
+      aria-label="Login"
+    >
+      <div
+        className="w-[420px] max-w-[92vw] rounded-2xl border border-primary/40 bg-popover/95 shadow-2xl glow-primary overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between border-b border-border p-4">
+          <div className="flex flex-col">
+            <span className="text-sm font-semibold">Sign in to CIAP</span>
+            <span className="text-xs text-muted-foreground mt-0.5">Karnataka Crime Intelligence & Analytics Platform</span>
+          </div>
+          <button onClick={onClose} aria-label="Close" className="rounded-md p-1 hover:bg-secondary">
+            <X className="h-4 w-4" />
+          </button>
         </div>
 
-        <button className="relative w-full flex items-center gap-3 rounded-xl border border-border/60 bg-card/60 p-2 text-sm text-sidebar-foreground/80 hover:text-sidebar-foreground hover:bg-sidebar-accent/70 hover:border-primary/50 transition">
-          <Bell className="h-4 w-4" />
-          <span className="flex-1 text-left">Notifications</span>
-          <span className="h-4 w-4 rounded-full bg-destructive text-[10px] flex items-center justify-center text-destructive-foreground font-medium">7</span>
+        {/* Body */}
+        <LoginModalBody onLogin={onLogin} />
+      </div>
+    </div>
+  );
+}
+
+function LoginModalBody({ onLogin }: { onLogin: () => void }) {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+
+  const handleCredentialLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!username.trim() || !password.trim()) { setError("Please enter username and password."); return; }
+    // Mock credential check — replace with real auth in production
+    if (username === "admin" && password === "ksp2024") {
+      onLogin();
+    } else {
+      setError("Invalid credentials. Try admin / ksp2024.");
+    }
+  };
+
+  return (
+    <div className="p-6 space-y-4">
+      <div className="rounded-xl border border-border/60 bg-secondary/30 p-3 text-xs text-muted-foreground text-center leading-relaxed">
+        Restricted to authorised KSP &amp; SCRB personnel. All activity is monitored.
+      </div>
+
+      {/* Username / Password form */}
+      <form onSubmit={handleCredentialLogin} className="space-y-3">
+        <div>
+          <label className="text-xs text-muted-foreground mb-1 block">Username</label>
+          <input
+            type="text"
+            value={username}
+            onChange={(e) => { setUsername(e.target.value); setError(""); }}
+            placeholder="e.g. admin"
+            className="w-full rounded-xl border border-border bg-input/60 px-3 py-2 text-sm outline-none focus:border-primary transition"
+          />
+        </div>
+        <div>
+          <label className="text-xs text-muted-foreground mb-1 block">Password</label>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => { setPassword(e.target.value); setError(""); }}
+            placeholder="••••••••"
+            className="w-full rounded-xl border border-border bg-input/60 px-3 py-2 text-sm outline-none focus:border-primary transition"
+          />
+        </div>
+        {error && <p className="text-xs text-destructive">{error}</p>}
+        <button
+          type="submit"
+          className="w-full rounded-xl bg-primary text-primary-foreground px-4 py-2.5 text-sm font-semibold hover:bg-primary/90 transition"
+        >
+          Sign In
         </button>
+      </form>
 
-        {/* User card — shown last */}
-        <div className="flex items-center gap-3 rounded-xl border border-border/60 bg-card/60 pl-2 pr-3 py-2">
-          <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-accent grid place-items-center text-[11px] font-bold text-primary-foreground shadow-sm">DR</div>
-          <div className="text-xs leading-tight">
-            <div className="font-medium text-sidebar-foreground">DIG R. Kumar</div>
-            <div className="text-muted-foreground mt-0.5">SCRB · Cmd Ctr</div>
-          </div>
-        </div>
+      {/* Divider */}
+      <div className="flex items-center gap-3">
+        <div className="flex-1 h-px bg-border/60" />
+        <span className="text-[10px] text-muted-foreground">OR</span>
+        <div className="flex-1 h-px bg-border/60" />
       </div>
-    </aside>
-  );
-}
 
-function RightPanel() {
-  return (
-    <aside className="sticky top-16 hidden xl:block h-[calc(100vh-4rem)] w-80 shrink-0 border-l border-border/60 bg-sidebar/40 backdrop-blur-xl overflow-y-auto p-4 space-y-4">
-      <PanelSection icon={<Radio className="h-4 w-4 text-destructive" />} title="Live Alerts" badge="LIVE">
-        <div className="space-y-2">
-          {liveAlerts.map((a) => (
-            <div key={a.id} className="rounded-lg border border-border/60 bg-card/60 p-2.5 text-xs">
-              <div className="flex items-center justify-between">
-                <span className={cn(
-                  "text-[10px] font-semibold tracking-wider uppercase",
-                  a.level === "critical" && "text-destructive",
-                  a.level === "high" && "text-orange-400",
-                  a.level === "medium" && "text-yellow-400",
-                )}>{a.level}</span>
-                <span className="text-muted-foreground">{a.ago} ago</span>
-              </div>
-              <div className="mt-1 font-medium">{a.title}</div>
-              <div className="text-muted-foreground">{a.where}</div>
-            </div>
-          ))}
-        </div>
-      </PanelSection>
+      {/* Google sign-in */}
+      <button
+        onClick={onLogin}
+        className="w-full flex items-center justify-center gap-3 rounded-xl border border-border bg-card/60 hover:bg-card hover:border-primary/50 px-4 py-3 text-sm font-medium transition"
+      >
+        <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+        </svg>
+        Continue with Google
+      </button>
 
-      <PanelSection icon={<Sparkles className="h-4 w-4 text-primary" />} title="AI Recommendations">
-        <ul className="space-y-2 text-xs text-muted-foreground">
-          <li className="flex gap-2"><Zap className="h-3.5 w-3.5 text-primary mt-0.5" /> Increase patrol density in Whitefield sector (18:00–02:00)</li>
-          <li className="flex gap-2"><Zap className="h-3.5 w-3.5 text-primary mt-0.5" /> Flag repeat offender cluster near MG Road</li>
-          <li className="flex gap-2"><Zap className="h-3.5 w-3.5 text-primary mt-0.5" /> Deploy cyber unit to Mangaluru — fraud spike +38%</li>
-        </ul>
-      </PanelSection>
-
-      <PanelSection icon={<CloudSun className="h-4 w-4 text-accent" />} title="Environment">
-        <div className="grid grid-cols-2 gap-2 text-xs">
-          <MetricTile label="Weather" value="28°C" sub="Bengaluru · Clear" />
-          <MetricTile label="Traffic" value="Moderate" sub="+12% vs avg" />
-          <MetricTile label="Uptime" value="99.98%" sub="Systems nominal" />
-          <MetricTile label="Data feed" value="LIVE" sub="12,480 evt/min" />
-        </div>
-      </PanelSection>
-
-      <PanelSection icon={<Activity className="h-4 w-4 text-emerald-400" />} title="System Health">
-        {[
-          { l: "API Gateway", v: 98 },
-          { l: "ML Cluster", v: 82 },
-          { l: "Data Ingest", v: 91 },
-          { l: "Geo Services", v: 76 },
-        ].map((m) => (
-          <div key={m.l} className="mb-2">
-            <div className="flex justify-between text-[11px]"><span>{m.l}</span><span className="text-primary">{m.v}%</span></div>
-            <div className="h-1 rounded-full bg-input overflow-hidden">
-              <div className="h-full bg-gradient-to-r from-emerald-400 to-primary" style={{ width: `${m.v}%` }} />
-            </div>
-          </div>
-        ))}
-      </PanelSection>
-    </aside>
-  );
-}
-
-function PanelSection({ icon, title, badge, children }: { icon: ReactNode; title: string; badge?: string; children: ReactNode }) {
-  return (
-    <section className="rounded-2xl border border-border/60 bg-card/40 backdrop-blur-lg p-3">
-      <div className="mb-2 flex items-center justify-between">
-        <div className="flex items-center gap-2 text-xs font-semibold tracking-wider uppercase text-muted-foreground">
-          {icon}<span>{title}</span>
-        </div>
-        {badge && <span className="text-[9px] px-1.5 py-0.5 rounded bg-destructive/20 text-destructive border border-destructive/40 animate-glow-pulse">{badge}</span>}
-      </div>
-      {children}
-    </section>
-  );
-}
-
-function MetricTile({ label, value, sub }: { label: string; value: string; sub: string }) {
-  return (
-    <div className="rounded-lg border border-border/60 bg-secondary/30 p-2">
-      <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</div>
-      <div className="text-sm font-semibold text-glow">{value}</div>
-      <div className="text-[10px] text-muted-foreground">{sub}</div>
+      <p className="text-[10px] text-center text-muted-foreground">
+        By signing in you agree to the KSP CIAP usage policy.
+      </p>
     </div>
   );
 }
@@ -428,11 +554,9 @@ function FloatingAI({ open, onOpenChange }: { open: boolean; onOpenChange: (v: b
       <button
         onClick={() => onOpenChange(!open)}
         aria-label="Open AI assistant"
-        className="fixed bottom-6 right-6 z-30 flex items-center gap-2 rounded-full border border-primary/50 bg-gradient-to-br from-primary to-accent px-4 py-3 text-sm font-medium text-primary-foreground shadow-xl glow-primary animate-float"
+        className="fixed bottom-6 right-6 z-30 h-12 w-12 flex items-center justify-center rounded-full border border-primary/50 bg-gradient-to-br from-primary to-accent text-primary-foreground shadow-xl glow-primary animate-float"
       >
-        <Sparkles className="h-4 w-4" />
-        <span>Ask CIAP</span>
-        <CircleDot className="h-3 w-3 animate-glow-pulse" />
+        <Sparkles className="h-5 w-5" />
       </button>
       {open && (
         <div className="fixed bottom-24 right-6 z-40 w-[420px] max-w-[94vw] rounded-2xl border border-primary/40 bg-popover/95 shadow-2xl glow-primary flex flex-col overflow-hidden" role="dialog" aria-label="AI assistant">

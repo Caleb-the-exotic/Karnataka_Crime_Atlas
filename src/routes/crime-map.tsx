@@ -32,10 +32,10 @@ function CrimeMapPage() {
   const [tab, setTab] = useState("overview");
   return (
     <div className="space-y-6">
-      <Breadcrumbs items={[{ label: "Home" }, { label: "Crime Map" }]} />
       <PageHeader
         eyebrow="GEOSPATIAL INTELLIGENCE"
         title="State-wide Crime Map"
+        titleStyle={{ fontFamily: '"Geist", sans-serif' }}
         description="Real WGS-84 Leaflet map — choropleth districts, station markers, clustered incidents, heatmap and 90-day timeline playback."
         actions={<div className="flex gap-2"><Chip tone="primary">{incidents.length.toLocaleString()} incidents</Chip><Chip>{districtGeo.length} districts</Chip></div>}
       />

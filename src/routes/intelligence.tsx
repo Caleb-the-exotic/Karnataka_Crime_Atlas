@@ -1,25 +1,23 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { Brain, TrendingUp, AlertTriangle, HeartPulse, Sparkles, PieChart, LayoutGrid, Sigma } from "lucide-react";
-import { PageHeader, Panel, Chip, Sparkline, Filters } from "@/components/ciap/primitives";
-import { HubTabs, TabPanel, Breadcrumbs } from "@/components/ciap/hub-tabs";
+import { Brain, TrendingUp, AlertTriangle, HeartPulse, PieChart, LayoutGrid, Sigma } from "lucide-react";
+import { PageHeader, Panel, Chip, Sparkline } from "@/components/ciap/primitives";
+import { HubTabs, TabPanel } from "@/components/ciap/hub-tabs";
 import { EChart } from "@/components/ciap/echart";
-import { KarnatakaMap } from "@/components/ciap/karnataka-map";
 import { correlationOption } from "@/lib/ciap/chart-options";
-import { kpis, crimeTrend, crimeCategories, hourly, districts } from "@/lib/ciap-data";
+import { kpis, crimeTrend, hourly } from "@/lib/ciap-data";
 import {
-  Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart as RePieChart,
+  Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Legend,
   ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from "recharts";
 import {
-  TrendingUp as TrendUp, TrendingDown, ShieldAlert, Activity, Radar, Users, Flame, FileCheck2,
+  TrendingUp as TrendUp, TrendingDown, ShieldAlert, Activity, Radar, Flame, FileCheck2,
   UserX, Fingerprint,
 } from "lucide-react";
 import { AdvancedAnalytics } from "./advanced-analytics";
 import { Predictive } from "./predictive";
 import { Trends } from "./trends";
 import { Anomaly } from "./anomaly";
-import { AIInsights } from "./ai-insights";
 import { SociologyPage } from "./sociology";
 import { CrimeAnalytics } from "./crime-analytics";
 
@@ -27,7 +25,7 @@ export const Route = createFileRoute("/intelligence")({
   head: () => ({
     meta: [
       { title: "CIAP · Intelligence" },
-      { name: "description", content: "Predictive intelligence, trends, anomalies, socio-economic analytics and AI insights in one workspace." },
+      { name: "description", content: "Predictive intelligence, trends, anomalies, socio-economic analytics in one workspace." },
       { property: "og:title", content: "CIAP · Intelligence" },
       { property: "og:description", content: "Unified intelligence workspace for KSP analysts." },
     ],
@@ -41,7 +39,6 @@ const TABS = [
   { id: "trends", label: "Trends", icon: TrendingUp },
   { id: "anomalies", label: "Anomalies", icon: AlertTriangle },
   { id: "socio", label: "Socio-economic", icon: HeartPulse },
-  { id: "ai", label: "AI Insights", icon: Sparkles },
   { id: "features", label: "Feature Importance", icon: Sigma },
   { id: "correlation", label: "Correlation Analysis", icon: PieChart },
 ];
@@ -59,11 +56,12 @@ const tooltipStyle = {
   color: "oklch(0.97 0.01 240)",
 };
 
+const geist = { fontFamily: '"Geist", sans-serif' };
+
 function IntelligenceHub() {
   const [tab, setTab] = useState("overview");
   return (
     <div className="space-y-6">
-      <Breadcrumbs items={[{ label: "Home" }, { label: "Intelligence" }]} />
       <HubTabs tabs={TABS} value={tab} onChange={setTab} />
 
       <TabPanel active={tab === "overview"}>
@@ -71,11 +69,11 @@ function IntelligenceHub() {
           <PageHeader
             eyebrow="INTELLIGENCE"
             title="Analytical Intelligence Workspace"
-            description="Consolidated advanced analytics, predictive intelligence, trends, anomaly detection, sociological correlations and AI insights."
+            description="Consolidated KPIs, trend analysis, anomaly detection, sociological correlations and predictions."
             actions={<Chip tone="primary">Model v4.2 · 87% confidence</Chip>}
           />
 
-          {/* KPI grid from dashboard */}
+          {/* KPI grid */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {kpis.map((k) => {
               const Icon = iconFor[k.key] ?? Activity;
@@ -105,62 +103,6 @@ function IntelligenceHub() {
                 </div>
               );
             })}
-          </div>
-
-          {/* Map + category panels */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <Panel title="Karnataka · Live Crime Map" subtitle="Zoomable · Heatmap · District boundaries · 1,247 stations" className="lg:col-span-2">
-              <div className="mb-3 flex flex-wrap items-center gap-3 text-[11px]">
-                <Filters items={["All crimes", "Robbery", "Cyber", "Narcotics", "Assault", "Homicide"]} />
-                <div className="ml-auto flex items-center gap-2 text-muted-foreground">
-                  <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-destructive" />Critical</span>
-                  <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-orange-400" />High</span>
-                  <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-primary" />Watch</span>
-                </div>
-              </div>
-              <KarnatakaMap height={480} />
-            </Panel>
-
-            <div className="space-y-4">
-              <Panel title="Crime Categories" subtitle="Last 30 days">
-                <div className="h-56">
-                  <ResponsiveContainer>
-                    <RePieChart>
-                      <Pie data={crimeCategories} dataKey="value" nameKey="name" innerRadius={45} outerRadius={80} paddingAngle={3} strokeWidth={0}>
-                        {crimeCategories.map((_, i) => (
-                          <Cell key={i} fill={`oklch(${0.6 + i * 0.04} 0.2 ${180 + i * 20})`} />
-                        ))}
-                      </Pie>
-                      <Tooltip contentStyle={tooltipStyle} />
-                    </RePieChart>
-                  </ResponsiveContainer>
-                </div>
-                <div className="grid grid-cols-2 gap-1 text-[11px]">
-                  {crimeCategories.slice(0, 6).map((c, i) => (
-                    <div key={c.name} className="flex items-center gap-1.5 text-muted-foreground">
-                      <span className="h-2 w-2 rounded-sm" style={{ background: `oklch(${0.6 + i * 0.04} 0.2 ${180 + i * 20})` }} />
-                      <span className="flex-1 truncate">{c.name}</span>
-                      <span className="tabular-nums text-foreground">{c.value}</span>
-                    </div>
-                  ))}
-                </div>
-              </Panel>
-
-              <Panel title="High-Risk Districts" subtitle="Ranked by AI risk score">
-                <ul className="space-y-2">
-                  {[...districts].sort((a, b) => b.risk - a.risk).slice(0, 6).map((d, i) => (
-                    <li key={d.name} className="flex items-center gap-3">
-                      <span className="text-[10px] w-5 tabular-nums text-muted-foreground">#{i + 1}</span>
-                      <span className="flex-1 text-sm">{d.name}</span>
-                      <div className="w-24 h-1.5 rounded-full bg-input overflow-hidden">
-                        <div className="h-full bg-gradient-to-r from-primary to-destructive" style={{ width: `${d.risk}%` }} />
-                      </div>
-                      <span className="text-xs tabular-nums text-primary w-8 text-right">{d.risk}</span>
-                    </li>
-                  ))}
-                </ul>
-              </Panel>
-            </div>
           </div>
 
           {/* Trend + Hourly charts */}
@@ -218,7 +160,6 @@ function IntelligenceHub() {
       <TabPanel active={tab === "trends"}><Trends /></TabPanel>
       <TabPanel active={tab === "anomalies"}><Anomaly /></TabPanel>
       <TabPanel active={tab === "socio"}><SociologyPage /></TabPanel>
-      <TabPanel active={tab === "ai"}><AIInsights /></TabPanel>
       <TabPanel active={tab === "features"}>
         <div className="space-y-6">
           <PageHeader eyebrow="MODEL EXPLAINABILITY" title="Feature Importance" description="SHAP-based ranking of factors driving crime predictions." />

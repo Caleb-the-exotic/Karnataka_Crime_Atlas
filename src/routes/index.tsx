@@ -33,7 +33,7 @@ function Dashboard() {
   return (
     <div className="space-y-10 -mx-6 -mt-6">
       {/* ── Hero / Threads section ─────────────────────────────── */}
-      <section className="relative w-full overflow-hidden" style={{ height: "600px" }}>
+      <section className="relative w-full overflow-hidden" style={{ height: "calc(100vh - 4rem)" }}>
         {/* Threads canvas fills the full hero */}
         <div className="absolute inset-0">
           <Threads amplitude={1} distance={0} enableMouseInteraction color={[0.45, 0.71, 0.92]} />
@@ -44,15 +44,7 @@ function Dashboard() {
 
         {/* Centred text content */}
         <div className="relative z-10 flex flex-col items-center justify-center h-full gap-6 px-6 text-center">
-          <div className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-4 py-1.5 text-xs tracking-[0.2em] text-primary uppercase backdrop-blur-sm">
-            <span className="relative flex h-2 w-2">
-              <span className="absolute inset-0 rounded-full bg-primary animate-pulse-ring" />
-              <span className="relative rounded-full bg-primary h-2 w-2" />
-            </span>
-            Live · SCRB Karnataka
-          </div>
-
-          <h1 className="text-5xl md:text-6xl font-bold tracking-tight text-glow leading-tight max-w-3xl">
+          <h1 className="text-5xl md:text-6xl font-bold tracking-tight text-glow leading-tight max-w-3xl" style={{ fontFamily: '"Geist", sans-serif' }}>
             Crime Intelligence<br />
             <span className="text-primary">Atlas Platform</span>
           </h1>

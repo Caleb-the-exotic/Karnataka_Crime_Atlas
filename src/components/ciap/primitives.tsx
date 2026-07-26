@@ -24,14 +24,14 @@ export function Panel({ title, subtitle, icon, actions, children, className }: {
   );
 }
 
-export function PageHeader({ eyebrow, title, description, actions }: {
-  eyebrow?: string; title: string; description?: string; actions?: ReactNode;
+export function PageHeader({ eyebrow, title, description, actions, titleStyle }: {
+  eyebrow?: string; title: string; description?: string; actions?: ReactNode; titleStyle?: React.CSSProperties;
 }) {
   return (
     <div className="mb-6 flex items-end justify-between gap-4 flex-wrap">
       <div>
         {eyebrow && <div className="text-[10px] tracking-[0.3em] uppercase text-primary">{eyebrow}</div>}
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-glow">{title}</h1>
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-glow" style={titleStyle}>{title}</h1>
         {description && <p className="mt-1 text-sm text-muted-foreground max-w-2xl">{description}</p>}
       </div>
       {actions}
