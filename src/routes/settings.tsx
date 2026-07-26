@@ -52,9 +52,6 @@ function SettingsPage() {
             ))}
           </div>
         </Panel>
-        <Panel title="Role & Access">
-          <div className="text-sm text-muted-foreground">Signed in as <span className="text-foreground font-medium">DIG R. Kumar</span> · Role <span className="text-primary">Command Centre</span> · SCRB Bengaluru.</div>
-        </Panel>
         <Panel title="Shortcuts">
           <button onClick={() => window.dispatchEvent(new KeyboardEvent('keydown', { key: '?' }))} className="w-full rounded-lg border border-border bg-secondary/30 p-3 text-sm flex items-center justify-center gap-2 hover:border-primary/60 transition">
             <Keyboard className="h-4 w-4" /> View Keyboard Shortcuts

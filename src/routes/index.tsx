@@ -43,14 +43,12 @@ function Dashboard() {
         <div className="absolute inset-0 bg-gradient-to-b from-background/30 via-transparent to-background/80 pointer-events-none" />
 
         {/* Centred text content */}
-        <div className="relative z-10 flex flex-col items-center justify-between h-full py-16 px-6 text-center">
-          <div className="mt-8">
-            <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight uppercase" style={{ fontFamily: '"Geist", sans-serif' }}>
-              Crime Intelligence Atlas Platform
-            </h1>
-          </div>
+        <div className="relative z-10 flex flex-col items-center justify-center h-full gap-4 px-6 text-center">
+          <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight uppercase" style={{ fontFamily: '"Geist", sans-serif' }}>
+            Crime Intelligence Atlas Platform
+          </h1>
 
-          <div className="mt-auto flex items-center gap-3 flex-wrap justify-center">
+          <div className="flex items-center gap-3 flex-wrap justify-center mt-2">
             <Link
               to="/crime-map"
               className="flex items-center gap-2 rounded-xl bg-primary text-primary-foreground px-5 py-2.5 text-sm font-semibold hover:bg-primary/90 transition shadow-lg"
@@ -130,24 +128,6 @@ function Dashboard() {
                 </div>
                 <div className="font-semibold leading-tight">{a.title}</div>
                 <div className="text-muted-foreground text-xs">{a.where}</div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* ── System status bar ───────────────────────────────────── */}
-        <section className="rounded-2xl border border-border/60 bg-card/40 backdrop-blur-xl p-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center text-xs">
-            {[
-              { label: "Total Incidents (State)", value: "84,512", icon: Shield },
-              { label: "Active Districts", value: "31 / 31", icon: MapIcon },
-              { label: "AI Model Confidence", value: "87%", icon: Brain },
-              { label: "Data Feed", value: "12,480 evt/min", icon: Zap },
-            ].map(({ label, value, icon: Icon }) => (
-              <div key={label} className="flex flex-col items-center gap-1">
-                <Icon className="h-4 w-4 text-primary mb-1" />
-                <div className="text-xl font-bold tabular-nums text-glow">{value}</div>
-                <div className="text-muted-foreground">{label}</div>
               </div>
             ))}
           </div>

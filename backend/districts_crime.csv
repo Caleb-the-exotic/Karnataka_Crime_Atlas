@@ -1,0 +1,11 @@
+district,population,annual_crimes,risk_score,recent_90d_incidents,top_category
+Bengaluru Urban,9621551,32410,92,4120,Theft
+Mysuru,3001127,8420,78,980,Robbery
+Mangaluru,2089649,6120,84,710,Cyber
+Kalaburagi,2566326,5110,69,540,Assault
+Hubballi-Dharwad,1847000,4900,65,480,Theft
+Belagavi,4779661,4200,58,390,Fraud
+Davanagere,1945497,3100,52,310,Narcotics
+Ballari,2452595,2900,50,290,Assault
+Shivamogga,1752753,2400,45,240,Theft
+Tumakuru,2678980,2100,41,210,Fraud

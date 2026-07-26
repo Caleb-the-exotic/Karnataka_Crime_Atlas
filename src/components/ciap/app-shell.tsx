@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { useI18n } from "@/lib/ciap/i18n";
 import { Toaster } from "@/components/ui/sonner";
 import { districtGeo, incidents, crimeCategoryList, hotspots } from "@/lib/ciap/geo";
+import { askMultiAI } from "@/lib/ciap/ai-service";
 
 const nav = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard, kbd: "g d" },
@@ -345,7 +346,28 @@ function LoginModalBody({ onLogin }: { onLogin: () => void }) {
 
       {/* Google sign-in */}
       <button
-        onClick={onLogin}
+        onClick={() => {
+          if (typeof window !== "undefined" && (window as any).google?.accounts?.id) {
+            (window as any).google.accounts.id.initialize({
+              client_id: "597310670290-n2jllrtic6a3gp2b77bqcol6s7ov1gjv.apps.googleusercontent.com",
+              callback: () => onLogin(),
+            });
+            (window as any).google.accounts.id.prompt();
+          } else {
+            const script = document.createElement("script");
+            script.src = "https://accounts.google.com/gsi/client";
+            script.async = true;
+            script.onload = () => {
+              (window as any).google?.accounts?.id?.initialize({
+                client_id: "597310670290-n2jllrtic6a3gp2b77bqcol6s7ov1gjv.apps.googleusercontent.com",
+                callback: () => onLogin(),
+              });
+              (window as any).google?.accounts?.id?.prompt(() => onLogin());
+            };
+            document.body.appendChild(script);
+            onLogin();
+          }
+        }}
         className="w-full flex items-center justify-center gap-3 rounded-xl border border-border bg-card/60 hover:bg-card hover:border-primary/50 px-4 py-3 text-sm font-medium transition"
       >
         <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24">
@@ -533,8 +555,11 @@ function FloatingAI({ open, onOpenChange }: { open: boolean; onOpenChange: (v: b
     setMessages((m) => [...m, { role: "user", content: q, ts: Date.now() }]);
     setBusy(true);
     try {
-      const answer = await answerFromDashboard(q);
+      const answer = await askMultiAI(q);
       setMessages((m) => [...m, { role: "assistant", content: answer, ts: Date.now() }]);
+    } catch {
+      const fallback = await answerFromDashboard(q);
+      setMessages((m) => [...m, { role: "assistant", content: fallback, ts: Date.now() }]);
     } finally {
       setBusy(false);
       setInput("");

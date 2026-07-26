@@ -1,0 +1,6 @@
+incident_id,category,severity,district,police_station,date,status,summary
+INC-2026-8801,Theft,Medium,Bengaluru Urban,MG Road Police Station,2026-07-25,Under Investigation,Larceny reported near Commercial Street junction.
+INC-2026-8802,Cyber,High,Mangaluru,Panambur Marine Police Station,2026-07-24,FIR Registered,Phishing network targetting coastal bank accounts.
+INC-2026-8803,Vehicle Theft,Low,Bengaluru Urban,Whitefield Police Station,2026-07-24,Resolved,Two-wheeler recovered via ANPR alert.
+INC-2026-8804,Narcotics,Critical,Kalaburagi,MB Nagar Police Station,2026-07-23,Charge Sheet Filed,Seizure of contraband during highway check.
+INC-2026-8805,Assault,High,Mysuru,Vidyaranyapuram Police Station,2026-07-22,Under Investigation,Inter-group clash reported near ring road.

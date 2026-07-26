@@ -196,23 +196,6 @@ function DataImportPage() {
           </ul>
         )}
       </Panel>
-
-      <Panel title="Live Pipelines" icon={<Database className="h-4 w-4" />}>
-        <ul className="space-y-2 text-sm">
-          {[
-            { n: "CCTNS · Statewide FIR feed", ok: true, t: "12,480 evt/min" },
-            { n: "Traffic · ANPR cameras", ok: true, t: "8,120 evt/min" },
-            { n: "Cyber Cell · fraud reports", ok: false, t: "312 evt/min" },
-            { n: "Financial · STR alerts", ok: true, t: "48 evt/min" },
-          ].map((p) => (
-            <li key={p.n} className="flex items-center gap-3 rounded-lg border border-border/60 bg-secondary/30 p-3">
-              {p.ok ? <CheckCircle2 className="h-4 w-4 text-emerald-400" /> : <AlertCircle className="h-4 w-4 text-yellow-400" />}
-              <span className="flex-1">{p.n}</span>
-              <span className="text-xs text-muted-foreground tabular-nums">{p.t}</span>
-            </li>
-          ))}
-        </ul>
-      </Panel>
     </div>
   );
 }

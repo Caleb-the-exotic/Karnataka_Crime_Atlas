@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { PageHeader, Panel, Chip } from "@/components/ciap/primitives";
-import { FileText, FileSpreadsheet, Presentation, Download, Loader2 } from "lucide-react";
+import { FileText, FileSpreadsheet, Presentation, Download, Loader2, Send, X, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { exportPDF, exportExcel, exportCSV, exportPPTX, exportJSON, type ReportPayload, type ReportTable } from "@/lib/ciap/export";
 import { districtGeo, incidents, hotspots, crimeCategoryList } from "@/lib/ciap/geo";
@@ -57,6 +57,43 @@ function buildPayload(): ReportPayload {
 
 function ReportsPage() {
   const [busy, setBusy] = useState<string | null>(null);
+  const [complaintOpen, setComplaintOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    district: districtGeo[0]?.name || "Bengaluru Urban",
+    category: crimeCategoryList[0] || "Theft",
+    details: "",
+  });
+
+  const handleComplaintSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.email || !formData.details) {
+      toast.error("Please fill in all required fields.");
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const res = await fetch("https://formspree.io/f/mqegqzdw", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify(formData),
+      });
+      if (res.ok) {
+        toast.success("Complaint submitted successfully! An email has been sent.");
+        setComplaintOpen(false);
+        setFormData({ name: "", email: "", phone: "", district: districtGeo[0]?.name || "Bengaluru Urban", category: crimeCategoryList[0] || "Theft", details: "" });
+      } else {
+        toast.error("Failed to submit complaint. Please try again.");
+      }
+    } catch {
+      toast.error("Network error submitting complaint.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   const run = async (kind: "pdf" | "xlsx" | "csv" | "pptx" | "json") => {
     setBusy(kind);
@@ -87,7 +124,18 @@ function ReportsPage() {
         eyebrow="REPORTING"
         title="Executive Reports & Exports"
         description="Fully in-browser PDF / Excel / CSV / PowerPoint generation with the current dashboard dataset."
-        actions={<Chip tone="primary">{incidents.length.toLocaleString()} records ready</Chip>}
+        actions={
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setComplaintOpen(true)}
+              className="flex items-center gap-2 rounded-xl bg-destructive text-destructive-foreground px-4 py-2 text-xs font-semibold hover:bg-destructive/90 transition shadow-md"
+            >
+              <AlertTriangle className="h-4 w-4" />
+              <span>Submit Complaint</span>
+            </button>
+            <Chip tone="primary">{incidents.length.toLocaleString()} records ready</Chip>
+          </div>
+        }
       />
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
         {cards.map((f) => {
@@ -120,6 +168,84 @@ function ReportsPage() {
           Download report payload (.json)
         </button>
       </Panel>
+
+      {/* Complaint Modal with Formspree */}
+      {complaintOpen && (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-background/70 backdrop-blur-sm" onClick={() => setComplaintOpen(false)}>
+          <div className="w-[500px] max-w-[92vw] rounded-2xl border border-destructive/40 bg-popover/95 shadow-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between border-b border-border p-4">
+              <div className="flex items-center gap-2 text-destructive font-semibold text-sm">
+                <AlertTriangle className="h-4 w-4" />
+                <span>Submit Official Complaint / Incident Report</span>
+              </div>
+              <button onClick={() => setComplaintOpen(false)} aria-label="Close" className="rounded-md p-1 hover:bg-secondary"><X className="h-4 w-4" /></button>
+            </div>
+            <form onSubmit={handleComplaintSubmit} className="p-6 space-y-3 text-xs">
+              <div>
+                <label className="text-muted-foreground mb-1 block">Full Name</label>
+                <input
+                  type="text" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  placeholder="e.g. Officer R. Sharma" required
+                  className="w-full rounded-lg border border-border bg-input/60 px-3 py-2 text-sm outline-none focus:border-primary"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-muted-foreground mb-1 block">Email Address (Required)</label>
+                  <input
+                    type="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    placeholder="name@ksp.gov.in" required
+                    className="w-full rounded-lg border border-border bg-input/60 px-3 py-2 text-sm outline-none focus:border-primary"
+                  />
+                </div>
+                <div>
+                  <label className="text-muted-foreground mb-1 block">Phone Number</label>
+                  <input
+                    type="tel" value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    placeholder="+91 98765 43210"
+                    className="w-full rounded-lg border border-border bg-input/60 px-3 py-2 text-sm outline-none focus:border-primary"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-muted-foreground mb-1 block">District</label>
+                  <select
+                    value={formData.district} onChange={(e) => setFormData({ ...formData, district: e.target.value })}
+                    className="w-full rounded-lg border border-border bg-input/60 px-3 py-2 text-sm outline-none focus:border-primary"
+                  >
+                    {districtGeo.map((d) => <option key={d.name} value={d.name}>{d.name}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-muted-foreground mb-1 block">Crime Category</label>
+                  <select
+                    value={formData.category} onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                    className="w-full rounded-lg border border-border bg-input/60 px-3 py-2 text-sm outline-none focus:border-primary"
+                  >
+                    {crimeCategoryList.map((c) => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className="text-muted-foreground mb-1 block">Complaint Details (Required)</label>
+                <textarea
+                  rows={4} value={formData.details} onChange={(e) => setFormData({ ...formData, details: e.target.value })}
+                  placeholder="Describe the complaint or incident in detail..." required
+                  className="w-full rounded-lg border border-border bg-input/60 px-3 py-2 text-sm outline-none focus:border-primary"
+                />
+              </div>
+              <button
+                type="submit" disabled={submitting}
+                className="w-full flex items-center justify-center gap-2 rounded-xl bg-destructive text-destructive-foreground px-4 py-2.5 text-sm font-semibold hover:bg-destructive/90 transition disabled:opacity-50"
+              >
+                {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                <span>Submit Complaint (Formspree Mail)</span>
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
