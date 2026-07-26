@@ -6,6 +6,19 @@ import { logger } from "../lib/logger.js";
 import { createError } from "../middleware/error-handler.js";
 import type { ImportStatus, LogLevel } from "@prisma/client";
 
+// Local file type (avoids needing Express global namespace)
+interface MulterFile {
+  fieldname: string;
+  originalname: string;
+  encoding: string;
+  mimetype: string;
+  size: number;
+  destination?: string;
+  filename: string;
+  path: string;
+  buffer?: Buffer;
+}
+
 // ── Types ─────────────────────────────────────────────────────────────────
 interface SheetRow {
   [key: string]: string | number | undefined;
@@ -35,7 +48,7 @@ export function parseExcelFile(filePath: string): ParseResult[] {
 
   for (const sheetName of workbook.SheetNames) {
     const sheet = workbook.Sheets[sheetName];
-    const rawRows = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, {
+    const rawRows = XLSX.utils.sheet_to_json(sheet, {
       header: 1,
       defval: "",
       blankrows: false,
@@ -331,7 +344,7 @@ export async function importExcelFile(batchId: number, filePath: string): Promis
 }
 
 // ── Create Batch Record ────────────────────────────────────────────────────
-export async function createImportBatch(file: Express.Multer.File, importedBy: string, isReImport = false) {
+export async function createImportBatch(file: MulterFile, importedBy: string, isReImport = false) {
   return prisma.excelImportBatch.create({
     data: {
       FileName: file.filename,

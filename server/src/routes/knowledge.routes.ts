@@ -1,4 +1,5 @@
 import { Router } from "express";
+import type { Request, Response } from "express";
 import * as searchService from "../services/search.service.js";
 
 export const knowledgeRouter = Router();
@@ -9,7 +10,7 @@ export const knowledgeRouter = Router();
  *          The existing frontend AI service calls this endpoint to enrich LLM context
  *          with imported FIR records and Excel data before sending to Groq/OpenRouter.
  */
-knowledgeRouter.get("/query", async (req, res) => {
+knowledgeRouter.get("/query", async (req: Request, res: Response) => {
   const q = String(req.query.q ?? "").trim();
   const limit = Number(req.query.limit ?? 10);
   if (q.length < 2) { res.status(400).json({ error: "Query too short" }); return; }
@@ -21,7 +22,7 @@ knowledgeRouter.get("/query", async (req, res) => {
  * @route   GET /api/v1/knowledge/stats
  * @desc    Knowledge repository statistics
  */
-knowledgeRouter.get("/stats", async (req, res) => {
+knowledgeRouter.get("/stats", async (_req: Request, res: Response) => {
   const { prisma } = await import("../lib/prisma.js");
   const [total, byType] = await Promise.all([
     prisma.knowledgeRecord.count(),
@@ -34,7 +35,10 @@ knowledgeRouter.get("/stats", async (req, res) => {
     success: true,
     data: {
       totalRecords: total,
-      byType: byType.map((t) => ({ type: t.RecordType, count: t._count.RecordID })),
+      byType: byType.map((t: { RecordType: string; _count: { RecordID: number } }) => ({
+        type: t.RecordType,
+        count: t._count.RecordID,
+      })),
     },
   });
 });

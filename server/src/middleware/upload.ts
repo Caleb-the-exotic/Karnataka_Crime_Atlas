@@ -41,7 +41,7 @@ export const excelUpload = multer({
 // ── Evidence Upload Storage ───────────────────────────────────────────────
 const evidenceStorage = multer.diskStorage({
   destination: (req, _file, cb) => {
-    const complaintId = req.params.complaintId ?? "misc";
+    const complaintId = String(req.params.complaintId ?? "misc");
     const dir = path.resolve(uploadsDir, "evidence", complaintId);
     ensureDir(dir);
     cb(null, dir);

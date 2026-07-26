@@ -13,12 +13,6 @@ export const prisma =
     ],
   });
 
-prisma.$on("query", (e) => {
-  if (process.env.NODE_ENV !== "production") {
-    logger.debug(`Query: ${e.query} — ${e.duration}ms`);
-  }
-});
-
 if (process.env.NODE_ENV !== "production") {
   globalForPrisma.prisma = prisma;
 }

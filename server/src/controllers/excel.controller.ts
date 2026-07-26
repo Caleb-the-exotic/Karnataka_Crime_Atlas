@@ -1,9 +1,21 @@
 import type { Request, Response } from "express";
 import * as excelService from "../services/excel.service.js";
 
+interface MulterFile {
+  fieldname: string;
+  originalname: string;
+  encoding: string;
+  mimetype: string;
+  size: number;
+  destination?: string;
+  filename: string;
+  path: string;
+  buffer?: Buffer;
+}
+
 // POST /api/v1/excel/upload
 export async function upload(req: Request, res: Response) {
-  const file = req.file as Express.Multer.File;
+  const file = req.file as MulterFile | undefined;
   if (!file) { res.status(400).json({ error: "No file uploaded" }); return; }
   const importedBy = req.body.importedBy ?? "System";
   const isReImport = req.body.isReImport === "true";
@@ -41,7 +53,7 @@ export async function reimport(req: Request, res: Response) {
     mimetype: batch.MimeType,
     size: Number(batch.FileSizeBytes),
     path: batch.StoragePath,
-  } as Express.Multer.File;
+  } as MulterFile;
 
   const newBatch = await excelService.createImportBatch(file, req.body.importedBy ?? "System", true);
   excelService.importExcelFile(newBatch.BatchID, batch.StoragePath).catch(console.error);

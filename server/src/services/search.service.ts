@@ -204,5 +204,5 @@ export async function queryKnowledge(query: string, limit = 10) {
     take: limit,
   });
 
-  return records.map((r) => r.RawText).join("\n");
+  return records.map((r: { RawText: string }) => r.RawText).join("\n");
 }
