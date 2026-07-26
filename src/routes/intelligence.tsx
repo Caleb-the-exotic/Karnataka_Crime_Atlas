@@ -24,22 +24,22 @@ import { CrimeAnalytics } from "./crime-analytics";
 export const Route = createFileRoute("/intelligence")({
   head: () => ({
     meta: [
-      { title: "CIAP · Intelligence" },
-      { name: "description", content: "Predictive intelligence, trends, anomalies, socio-economic analytics in one workspace." },
-      { property: "og:title", content: "CIAP · Intelligence" },
-      { property: "og:description", content: "Unified intelligence workspace for KSP analysts." },
+      { title: "CIAP · Analytics" },
+      { name: "description", content: "Predictive analytics, trends, anomalies, socio-economic analytics and advanced visualization." },
+      { property: "og:title", content: "CIAP · Analytics" },
+      { property: "og:description", content: "Unified analytics workspace for KSP analysts." },
     ],
   }),
-  component: IntelligenceHub,
+  component: AnalyticsHub,
 });
 
 const TABS = [
   { id: "overview", label: "Overview", icon: LayoutGrid },
+  { id: "advanced", label: "Advanced Analytics", icon: Sigma },
   { id: "predictions", label: "Predictions", icon: Brain },
   { id: "trends", label: "Trends", icon: TrendingUp },
   { id: "anomalies", label: "Anomalies", icon: AlertTriangle },
   { id: "socio", label: "Socio-economic", icon: HeartPulse },
-  { id: "features", label: "Feature Importance", icon: Sigma },
   { id: "correlation", label: "Correlation Analysis", icon: PieChart },
 ];
 
@@ -56,9 +56,7 @@ const tooltipStyle = {
   color: "oklch(0.97 0.01 240)",
 };
 
-const geist = { fontFamily: '"Geist", sans-serif' };
-
-function IntelligenceHub() {
+function AnalyticsHub() {
   const [tab, setTab] = useState("overview");
   return (
     <div className="space-y-6">
@@ -67,8 +65,9 @@ function IntelligenceHub() {
       <TabPanel active={tab === "overview"}>
         <div className="space-y-6">
           <PageHeader
-            eyebrow="INTELLIGENCE"
-            title="Analytical Intelligence Workspace"
+            eyebrow="ANALYTICS"
+            title="Analytics Workspace"
+            titleStyle={{ fontFamily: '"Geist", sans-serif' }}
             description="Consolidated KPIs, trend analysis, anomaly detection, sociological correlations and predictions."
             actions={<Chip tone="primary">Model v4.2 · 87% confidence</Chip>}
           />
@@ -153,19 +152,13 @@ function IntelligenceHub() {
           </div>
 
           <CrimeAnalytics />
-          <AdvancedAnalytics />
         </div>
       </TabPanel>
+      <TabPanel active={tab === "advanced"}><AdvancedAnalytics /></TabPanel>
       <TabPanel active={tab === "predictions"}><Predictive /></TabPanel>
       <TabPanel active={tab === "trends"}><Trends /></TabPanel>
       <TabPanel active={tab === "anomalies"}><Anomaly /></TabPanel>
       <TabPanel active={tab === "socio"}><SociologyPage /></TabPanel>
-      <TabPanel active={tab === "features"}>
-        <div className="space-y-6">
-          <PageHeader eyebrow="MODEL EXPLAINABILITY" title="Feature Importance" description="SHAP-based ranking of factors driving crime predictions." />
-          <Predictive />
-        </div>
-      </TabPanel>
       <TabPanel active={tab === "correlation"}>
         <div className="space-y-6">
           <PageHeader eyebrow="CORRELATION" title="Socio-Crime Correlation Analysis" description="Pearson correlations between socio-economic indicators and crime intensity." />

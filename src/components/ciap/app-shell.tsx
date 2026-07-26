@@ -15,7 +15,7 @@ const nav = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard, kbd: "g d" },
   { to: "/crime-map", label: "Crime Map", icon: MapIcon, kbd: "g m" },
   { to: "/investigation", label: "Investigation Hub", icon: FolderSearch, kbd: "g i" },
-  { to: "/intelligence", label: "Intelligence", icon: Brain, kbd: "g n" },
+  { to: "/intelligence", label: "Analytics", icon: BarChart3, kbd: "g n" },
   { to: "/reports", label: "Reports", icon: FileText, kbd: "g r" },
   { to: "/data-import", label: "Data Import", icon: Upload, kbd: "g x" },
   { to: "/settings", label: "Settings", icon: Settings, kbd: "g ," },
@@ -143,10 +143,10 @@ function TopBar({ now, onCmd, onHelp, onAi, sidebarOpen, onToggleSidebar, user, 
         </button>
 
         {/* Centre title */}
-        <div className="flex-1 flex items-center justify-center gap-2 select-none pointer-events-none">
-          <ChevronLeft className="h-4 w-4 text-primary/60" />
-          <span className="italic font-semibold tracking-wide text-base text-glow" style={{ fontFamily: '"Geist", sans-serif' }}>Karnataka CIAP</span>
-          <ChevronRightIcon className="h-4 w-4 text-primary/60" />
+        <div className="flex-1 flex items-center justify-center gap-3 select-none pointer-events-none">
+          <ChevronLeft className="h-6 w-6 text-primary" />
+          <span className="italic font-bold tracking-wider text-xl text-foreground" style={{ fontFamily: '"Geist", sans-serif' }}>Karnataka CIAP</span>
+          <ChevronRightIcon className="h-6 w-6 text-primary" />
         </div>
 
         {/* User area */}

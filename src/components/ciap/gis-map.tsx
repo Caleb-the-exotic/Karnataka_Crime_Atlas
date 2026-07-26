@@ -61,6 +61,7 @@ export interface GisMapProps {
   /** Hide the toolbar for embedded/compact use. */
   compact?: boolean;
   className?: string;
+  showLayerControls?: boolean;
 }
 
 /**
@@ -71,7 +72,7 @@ export interface GisMapProps {
  * a 90-day animated timeline. Drawing, measurement and geocoded search are
  * provided by leaflet-draw + Nominatim.
  */
-export function GisMap({ height = 640, compact = false, className }: GisMapProps) {
+export function GisMap({ height = 640, compact = false, className, showLayerControls = false }: GisMapProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<LeafletNS.Map | null>(null);
   const LRef = useRef<typeof LeafletNS | null>(null);
@@ -84,7 +85,7 @@ export function GisMap({ height = 640, compact = false, className }: GisMapProps
   const [showStations, setShowStations] = useState(true);
   const [showHotspots, setShowHotspots] = useState(true);
   const [showHeat, setShowHeat] = useState(true);
-  const [showHex, setShowHex] = useState(false);
+  const [showHex, setShowHex] = useState(false); // keep state to avoid breaking drawing/bootstrapping logic but hide from UI
   const [showClusters, setShowClusters] = useState(true);
   const [heatOpacity, setHeatOpacity] = useState(0.75);
   const [categories, setCategories] = useState<CrimeCategory[]>([...crimeCategoryList]);
@@ -457,7 +458,6 @@ export function GisMap({ height = 640, compact = false, className }: GisMapProps
           </div>
 
           <ToolBtn active={showHeat} onClick={() => setShowHeat((v) => !v)} icon={Flame} label="Heatmap" />
-          <ToolBtn active={showHex} onClick={() => setShowHex((v) => !v)} icon={Hexagon} label="Hexbin" />
           <ToolBtn active={showClusters} onClick={() => setShowClusters((v) => !v)} icon={Crosshair} label="Cluster" />
 
           <div className="flex items-center gap-2 rounded-lg border border-border bg-input/40 px-2.5 py-1.5 text-[11px]">
@@ -491,7 +491,7 @@ export function GisMap({ height = 640, compact = false, className }: GisMapProps
         <div ref={containerRef} style={{ height }} className="w-full ciap-map z-0" role="application" aria-label="Karnataka crime GIS map" />
 
         {/* Layer control */}
-        {!compact && (
+        {!compact && showLayerControls && (
           <div className="absolute left-3 top-3 z-[600] w-52 rounded-xl border border-border/70 bg-popover/90 backdrop-blur-xl p-3 text-[11px] shadow-xl">
             <div className="mb-2 flex items-center gap-2 text-[10px] uppercase tracking-wider text-muted-foreground">
               <Layers className="h-3.5 w-3.5 text-primary" /> Layer Control
@@ -500,7 +500,6 @@ export function GisMap({ height = 640, compact = false, className }: GisMapProps
             <LayerToggle label="Police stations" checked={showStations} onChange={setShowStations} />
             <LayerToggle label="Crime hotspots" checked={showHotspots} onChange={setShowHotspots} />
             <LayerToggle label="Density heatmap" checked={showHeat} onChange={setShowHeat} />
-            <LayerToggle label="Hexbin overlay" checked={showHex} onChange={setShowHex} />
 
             <div className="mt-3 mb-1 text-[10px] uppercase tracking-wider text-muted-foreground">Crime categories</div>
             <div className="flex flex-wrap gap-1">
@@ -528,7 +527,7 @@ export function GisMap({ height = 640, compact = false, className }: GisMapProps
 
         {/* Timeline playback */}
         {!compact && (
-          <div className="absolute inset-x-3 bottom-3 z-[600] flex items-center gap-3 rounded-xl border border-border/70 bg-popover/90 backdrop-blur-xl px-3 py-2 text-[11px] shadow-xl">
+          <div className="absolute inset-x-0 bottom-0 z-[600] flex items-center gap-3 border-t border-border/60 bg-popover/95 backdrop-blur-xl px-4 py-3.5 text-[11px] shadow-xl">
             <button
               onClick={() => setPlaying((p) => !p)}
               aria-label={playing ? "Pause timeline" : "Play timeline"}

@@ -49,20 +49,6 @@ export function CrimeAnalytics() {
             </RadarChart>
           </ResponsiveContainer></div>
         </Panel>
-        <Panel title="Trend · Theft" className="lg:col-span-2">
-          <div className="h-72"><ResponsiveContainer>
-            <AreaChart data={crimeTrend}>
-              <defs>
-                <linearGradient id="g1" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stopColor="oklch(0.72 0.18 235)" stopOpacity={0.5} /><stop offset="100%" stopColor="oklch(0.72 0.18 235)" stopOpacity={0} /></linearGradient>
-              </defs>
-              <CartesianGrid stroke="oklch(0.4 0.03 240 / 0.2)" />
-              <XAxis dataKey="day" stroke="oklch(0.6 0.03 240)" fontSize={10} />
-              <YAxis stroke="oklch(0.6 0.03 240)" fontSize={10} />
-              <Tooltip contentStyle={tt} />
-              <Area type="monotone" dataKey="theft" stroke="oklch(0.72 0.18 235)" fill="url(#g1)" strokeWidth={2} />
-            </AreaChart>
-          </ResponsiveContainer></div>
-        </Panel>
       </div>
     </div>
   );
