@@ -4,7 +4,7 @@ import {
   LayoutDashboard, Map as MapIcon, FolderSearch, Brain, FileText, Sparkles, Flame, BarChart3,
   Upload, Settings, Bell, Command, CircleDot,
   Activity, Zap, ChevronRight, Keyboard,
-  X, Send, Menu, LogIn, ChevronLeft, ChevronRight as ChevronRightIcon,
+  X, Send, Menu, LogIn, ChevronRight as ChevronRightIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/lib/ciap/i18n";
