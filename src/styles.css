@@ -138,18 +138,7 @@
     color: var(--color-foreground);
     font-feature-settings: "ss01", "cv11";
   }
-  body::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    background-image:
-      linear-gradient(var(--grid-line) 1px, transparent 1px),
-      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
-    background-size: 48px 48px;
-    mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
-    z-index: 0;
-  }
+
 }
 
 @utility glass {

@@ -2,13 +2,12 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import {
   LayoutDashboard, Map as MapIcon, FolderSearch, Brain, FileText, Sparkles, Flame, BarChart3,
-  Upload, Settings, Search, Bell, Shield, Command, CircleDot, Radio,
-  Cpu, CloudSun, Activity, Zap, ChevronRight, Sun, Moon, Languages, Keyboard,
+  Upload, Settings, Bell, Shield, Command, CircleDot, Radio,
+  CloudSun, Activity, Zap, ChevronRight, Keyboard,
   X, Send,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { liveAlerts } from "@/lib/ciap-data";
-import { useTheme } from "@/lib/ciap/theme";
 import { useI18n } from "@/lib/ciap/i18n";
 import { Toaster } from "@/components/ui/sonner";
 import { districtGeo, incidents, crimeCategoryList, hotspots } from "@/lib/ciap/geo";
@@ -68,7 +67,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     <div className="relative min-h-screen w-full text-foreground">
       <TopBar now={now} onCmd={() => setCmdOpen(true)} onHelp={() => setHelpOpen(true)} onAi={() => setAiOpen(true)} />
       <div className="relative z-10 flex w-full pt-16">
-        <Sidebar />
+        <Sidebar now={now} />
         <main id="main" className="flex-1 min-w-0 px-6 py-6">{children}</main>
         <RightPanel />
       </div>
@@ -81,10 +80,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 }
 
 function TopBar({ now, onCmd, onHelp, onAi }: { now: Date; onCmd: () => void; onHelp: () => void; onAi: () => void }) {
-  const { theme, toggle } = useTheme();
-  const { lang, setLang, t } = useI18n();
-  const time = now.toLocaleTimeString("en-IN", { hour12: false });
-  const date = now.toLocaleDateString("en-IN", { weekday: "short", day: "2-digit", month: "short", year: "numeric" });
+  const { t } = useI18n();
   return (
     <header className="fixed inset-x-0 top-0 z-40 h-16 border-b border-border/60 backdrop-blur-2xl bg-background/70">
       <div className="flex h-full items-center gap-4 px-4">
@@ -100,73 +96,18 @@ function TopBar({ now, onCmd, onHelp, onAi }: { now: Date; onCmd: () => void; on
         </div>
 
         <div className="flex-1" />
-
-        <button
-          onClick={onCmd}
-          className="hidden md:flex items-center gap-3 w-[380px] rounded-xl border border-border bg-input/60 px-3 py-2 text-sm text-muted-foreground hover:border-primary/60 transition"
-        >
-          <Search className="h-4 w-4" />
-          <span className="flex-1 text-left">{t("top.search")}</span>
-          <kbd className="text-[10px] px-1.5 py-0.5 rounded bg-secondary border border-border">⌘K</kbd>
-        </button>
-
-        <button onClick={onAi} className="flex items-center gap-2 rounded-xl border border-primary/40 bg-primary/10 px-3 py-2 text-sm text-primary hover:bg-primary/20 transition">
-          <Sparkles className="h-4 w-4" />
-          <span className="hidden lg:inline">{t("top.assistant")}</span>
-        </button>
-
-        <button onClick={toggle} aria-label="Toggle theme" title={theme === "dark" ? "Switch to light" : "Switch to dark"} className="rounded-xl border border-border p-2 hover:border-primary/60 transition">
-          {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-        </button>
-        <button onClick={() => setLang(lang === "en" ? "kn" : "en")} aria-label="Toggle language" title="English / ಕನ್ನಡ" className="rounded-xl border border-border px-2 py-2 text-xs hover:border-primary/60 transition flex items-center gap-1">
-          <Languages className="h-4 w-4" /><span className="font-mono">{lang.toUpperCase()}</span>
-        </button>
-        <button onClick={onHelp} aria-label="Keyboard shortcuts" title="Keyboard shortcuts (?)" className="rounded-xl border border-border p-2 hover:border-primary/60 transition">
-          <Keyboard className="h-4 w-4" />
-        </button>
-
-        <StatusPill />
-
-        <div className="hidden md:flex flex-col items-end leading-tight text-xs">
-          <span className="font-mono text-primary text-glow">{time} IST</span>
-          <span className="text-muted-foreground">{date}</span>
-        </div>
-
-        <button className="relative rounded-xl border border-border p-2 hover:border-primary/60 transition">
-          <Bell className="h-4 w-4" />
-          <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-destructive text-[10px] flex items-center justify-center text-destructive-foreground">7</span>
-        </button>
-
-        <div className="flex items-center gap-2 rounded-xl border border-border pl-2 pr-3 py-1.5">
-          <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-primary to-accent grid place-items-center text-[11px] font-bold text-primary-foreground">DR</div>
-          <div className="hidden xl:block text-xs leading-tight">
-            <div className="font-medium">DIG R. Kumar</div>
-            <div className="text-muted-foreground">SCRB · Cmd Ctr</div>
-          </div>
-        </div>
       </div>
     </header>
   );
 }
 
-function StatusPill() {
-  return (
-    <div className="hidden md:flex items-center gap-2 rounded-full border border-border bg-secondary/40 px-3 py-1.5 text-xs">
-      <span className="relative flex h-2 w-2">
-        <span className="absolute inset-0 rounded-full bg-emerald-400 animate-pulse-ring" />
-        <span className="relative rounded-full bg-emerald-400 h-2 w-2" />
-      </span>
-      <span className="text-muted-foreground">Systems</span>
-      <span className="font-medium text-emerald-400">OPERATIONAL</span>
-    </div>
-  );
-}
-
-function Sidebar() {
+function Sidebar({ now }: { now: Date }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const time = now.toLocaleTimeString("en-IN", { hour12: false });
+  const date = now.toLocaleDateString("en-IN", { weekday: "short", day: "2-digit", month: "short", year: "numeric" });
   return (
-    <aside className="sticky top-16 h-[calc(100vh-4rem)] w-64 shrink-0 border-r border-border/60 bg-sidebar/60 backdrop-blur-xl overflow-y-auto">
-      <nav className="flex flex-col gap-0.5 p-3">
+    <aside className="sticky top-16 h-[calc(100vh-4rem)] w-64 shrink-0 border-r border-border/60 bg-sidebar/60 backdrop-blur-xl flex flex-col">
+      <nav className="flex-1 flex flex-col gap-0.5 p-3 overflow-y-auto">
         <div className="px-2 py-2 text-[10px] tracking-[0.25em] text-muted-foreground uppercase">Command Modules</div>
         {nav.map(({ to, label, icon: Icon }) => {
           const active = pathname === to;
@@ -188,19 +129,30 @@ function Sidebar() {
             </Link>
           );
         })}
+      </nav>
 
-        <div className="mt-4 rounded-xl border border-border/60 bg-secondary/40 p-3">
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <Cpu className="h-3.5 w-3.5" /> AI Engine
-          </div>
-          <div className="mt-2 h-1.5 w-full rounded-full bg-input overflow-hidden">
-            <div className="h-full w-[78%] bg-gradient-to-r from-primary via-accent to-primary animate-glow-pulse" />
-          </div>
-          <div className="mt-1.5 flex justify-between text-[10px] text-muted-foreground">
-            <span>Neural Load</span><span className="text-primary">78%</span>
+      <div className="p-4 border-t border-border/60 bg-sidebar-accent/10 space-y-3">
+        {/* Time clock — shown first */}
+        <div className="flex flex-col px-1 pb-1">
+          <span className="font-mono text-primary text-glow text-sm font-semibold">{time} IST</span>
+          <span className="text-muted-foreground text-[11px]">{date}</span>
+        </div>
+
+        <button className="relative w-full flex items-center gap-3 rounded-xl border border-border/60 bg-card/60 p-2 text-sm text-sidebar-foreground/80 hover:text-sidebar-foreground hover:bg-sidebar-accent/70 hover:border-primary/50 transition">
+          <Bell className="h-4 w-4" />
+          <span className="flex-1 text-left">Notifications</span>
+          <span className="h-4 w-4 rounded-full bg-destructive text-[10px] flex items-center justify-center text-destructive-foreground font-medium">7</span>
+        </button>
+
+        {/* User card — shown last */}
+        <div className="flex items-center gap-3 rounded-xl border border-border/60 bg-card/60 pl-2 pr-3 py-2">
+          <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-accent grid place-items-center text-[11px] font-bold text-primary-foreground shadow-sm">DR</div>
+          <div className="text-xs leading-tight">
+            <div className="font-medium text-sidebar-foreground">DIG R. Kumar</div>
+            <div className="text-muted-foreground mt-0.5">SCRB · Cmd Ctr</div>
           </div>
         </div>
-      </nav>
+      </div>
     </aside>
   );
 }

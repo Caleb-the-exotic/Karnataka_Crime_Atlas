@@ -1,191 +1,172 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { PageHeader, Panel, Chip, Sparkline, Filters } from "@/components/ciap/primitives";
-import { KarnatakaMap } from "@/components/ciap/karnataka-map";
-import { kpis, crimeTrend, crimeCategories, hourly, districts } from "@/lib/ciap-data";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import Threads from "@/components/ciap/Threads";
+import { liveAlerts } from "@/lib/ciap-data";
+import { cn } from "@/lib/utils";
 import {
-  Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart,
-  ResponsiveContainer, Tooltip, XAxis, YAxis,
-} from "recharts";
-import {
-  TrendingUp, TrendingDown, ShieldAlert, Activity, Radar, Users, Flame, FileCheck2,
-  UserX, Fingerprint,
+  Shield, Map as MapIcon, Brain, FolderSearch, FileText, Upload,
+  ArrowRight, Radio, Activity, Zap,
 } from "lucide-react";
 
-export const Route = createFileRoute("/")({
-  head: () => ({
-    meta: [
-      { title: "CIAP · Command Dashboard — Karnataka State Police" },
-      { name: "description", content: "Live command-center dashboard for the Karnataka State Police and State Crime Records Bureau." },
-      { property: "og:title", content: "CIAP Command Dashboard" },
-      { property: "og:description", content: "Live crime intelligence for KSP & SCRB." },
-    ],
-  }),
-  component: Dashboard,
-});
+export const Route = createFileRoute("/")(
+  {
+    head: () => ({
+      meta: [
+        { title: "CIAP · Command Dashboard — Karnataka State Police" },
+        { name: "description", content: "Live command-center dashboard for the Karnataka State Police and State Crime Records Bureau." },
+        { property: "og:title", content: "CIAP Command Dashboard" },
+        { property: "og:description", content: "Live crime intelligence for KSP & SCRB." },
+      ],
+    }),
+    component: Dashboard,
+  }
+);
 
-const iconFor: Record<string, any> = {
-  total: Activity, today: Radar, active: ShieldAlert, repeat: Fingerprint,
-  hot: Flame, ai: TrendingUp, wanted: UserX, solved: FileCheck2,
-};
+const quickLinks = [
+  { to: "/crime-map", label: "Crime Map", icon: MapIcon, desc: "Live district heat-map" },
+  { to: "/intelligence", label: "Intelligence", icon: Brain, desc: "Analytics & predictions" },
+  { to: "/investigation", label: "Investigation Hub", icon: FolderSearch, desc: "Case management" },
+  { to: "/reports", label: "Reports", icon: FileText, desc: "Generate & export" },
+  { to: "/data-import", label: "Data Import", icon: Upload, desc: "CSV / API ingest" },
+];
 
 function Dashboard() {
   return (
-    <div className="space-y-6">
-      <PageHeader
-        eyebrow="COMMAND CENTER · CLASSIFIED"
-        title="Karnataka State-wide Crime Intelligence"
-        description="Unified live view across 15 districts, 1,247 police stations and 84.5K incidents. AI models updated 4 min ago."
-        actions={
-          <div className="flex items-center gap-2">
-            <Chip tone="success">● LIVE</Chip>
-            <Chip tone="primary">MODEL v4.2</Chip>
-            <Chip>SHIFT · DAY</Chip>
-          </div>
-        }
-      />
+    <div className="space-y-10 -mx-6 -mt-6">
+      {/* ── Hero / Threads section ─────────────────────────────── */}
+      <section className="relative w-full overflow-hidden" style={{ height: "600px" }}>
+        {/* Threads canvas fills the full hero */}
+        <div className="absolute inset-0">
+          <Threads amplitude={1} distance={0} enableMouseInteraction color={[0.45, 0.71, 0.92]} />
+        </div>
 
-      {/* KPI grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        {kpis.map((k) => {
-          const Icon = iconFor[k.key] ?? Activity;
-          const up = k.delta >= 0;
-          return (
-            <div key={k.key} className="group relative overflow-hidden rounded-2xl border border-border/60 bg-card/50 backdrop-blur-xl p-4 hover:border-primary/50 transition">
-              <div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition bg-gradient-to-br from-primary/5 to-accent/5" />
-              <div className="relative flex items-start justify-between">
-                <div>
-                  <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">{k.label}</div>
-                  <div className="mt-1 text-2xl font-semibold tabular-nums text-glow">{k.value.toLocaleString()}</div>
-                </div>
-                <div className="h-9 w-9 rounded-xl border border-primary/30 bg-primary/10 grid place-items-center">
+        {/* Overlay gradient so content is readable */}
+        <div className="absolute inset-0 bg-gradient-to-b from-background/30 via-transparent to-background/80 pointer-events-none" />
+
+        {/* Centred text content */}
+        <div className="relative z-10 flex flex-col items-center justify-center h-full gap-6 px-6 text-center">
+          <div className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-4 py-1.5 text-xs tracking-[0.2em] text-primary uppercase backdrop-blur-sm">
+            <span className="relative flex h-2 w-2">
+              <span className="absolute inset-0 rounded-full bg-primary animate-pulse-ring" />
+              <span className="relative rounded-full bg-primary h-2 w-2" />
+            </span>
+            Live · SCRB Karnataka
+          </div>
+
+          <h1 className="text-5xl md:text-6xl font-bold tracking-tight text-glow leading-tight max-w-3xl">
+            Crime Intelligence<br />
+            <span className="text-primary">Atlas Platform</span>
+          </h1>
+
+          <p className="text-muted-foreground text-lg max-w-xl leading-relaxed">
+            Unified live view across <span className="text-foreground font-medium">31 districts</span>,{" "}
+            <span className="text-foreground font-medium">1,247 police stations</span> and{" "}
+            <span className="text-foreground font-medium">84.5K incidents</span>.
+            AI models updated 4 min ago.
+          </p>
+
+          <div className="flex items-center gap-3 flex-wrap justify-center">
+            <Link
+              to="/crime-map"
+              className="flex items-center gap-2 rounded-xl bg-primary text-primary-foreground px-5 py-2.5 text-sm font-semibold hover:bg-primary/90 transition shadow-lg"
+            >
+              <MapIcon className="h-4 w-4" /> Open Crime Map <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Link
+              to="/intelligence"
+              className="flex items-center gap-2 rounded-xl border border-primary/40 bg-primary/10 text-primary px-5 py-2.5 text-sm font-semibold hover:bg-primary/20 transition"
+            >
+              <Brain className="h-4 w-4" /> Intelligence Hub
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <div className="px-6 space-y-10">
+        {/* ── Quick navigation cards ──────────────────────────────── */}
+        <section>
+          <div className="flex items-center gap-2 mb-4">
+            <Activity className="h-4 w-4 text-primary" />
+            <span className="text-xs tracking-[0.25em] uppercase text-muted-foreground">Command Modules</span>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+            {quickLinks.map(({ to, label, icon: Icon, desc }) => (
+              <Link
+                key={to}
+                to={to}
+                className="group flex flex-col gap-3 rounded-2xl border border-border/60 bg-card/50 backdrop-blur-xl p-4 hover:border-primary/50 hover:bg-card/80 transition"
+              >
+                <div className="h-9 w-9 rounded-xl border border-primary/30 bg-primary/10 grid place-items-center group-hover:bg-primary/20 transition">
                   <Icon className="h-4 w-4 text-primary" />
                 </div>
-              </div>
-              <div className="relative mt-3">
-                <Sparkline data={k.spark} tone={up ? "primary" : "danger"} />
-              </div>
-              <div className="relative mt-2 flex items-center justify-between text-[11px]">
-                <span className={up ? "text-emerald-400 flex items-center gap-1" : "text-destructive flex items-center gap-1"}>
-                  {up ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
-                  {up ? "+" : ""}{k.delta}%
-                </span>
-                <span className="text-muted-foreground">vs last 7d</span>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Map + side panels */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <Panel title="Karnataka · Live Crime Map" subtitle="Zoomable · Heatmap · District boundaries · 1,247 stations" className="lg:col-span-2">
-          <div className="mb-3 flex flex-wrap items-center gap-3 text-[11px]">
-            <Filters items={["All crimes", "Robbery", "Cyber", "Narcotics", "Assault", "Homicide"]} />
-            <div className="ml-auto flex items-center gap-2 text-muted-foreground">
-              <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-destructive" />Critical</span>
-              <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-orange-400" />High</span>
-              <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-primary" />Watch</span>
-            </div>
-          </div>
-          <KarnatakaMap height={480} />
-        </Panel>
-
-        <div className="space-y-4">
-          <Panel title="Crime Categories" subtitle="Last 30 days">
-            <div className="h-56">
-              <ResponsiveContainer>
-                <PieChart>
-                  <Pie data={crimeCategories} dataKey="value" nameKey="name" innerRadius={45} outerRadius={80} paddingAngle={3} strokeWidth={0}>
-                    {crimeCategories.map((_, i) => (
-                      <Cell key={i} fill={`oklch(${0.6 + i * 0.04} 0.2 ${180 + i * 20})`} />
-                    ))}
-                  </Pie>
-                  <Tooltip contentStyle={tooltipStyle} />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="grid grid-cols-2 gap-1 text-[11px]">
-              {crimeCategories.slice(0, 6).map((c, i) => (
-                <div key={c.name} className="flex items-center gap-1.5 text-muted-foreground">
-                  <span className="h-2 w-2 rounded-sm" style={{ background: `oklch(${0.6 + i * 0.04} 0.2 ${180 + i * 20})` }} />
-                  <span className="flex-1 truncate">{c.name}</span>
-                  <span className="tabular-nums text-foreground">{c.value}</span>
+                <div>
+                  <div className="text-sm font-medium">{label}</div>
+                  <div className="text-[11px] text-muted-foreground mt-0.5">{desc}</div>
                 </div>
-              ))}
+                <ArrowRight className="h-3.5 w-3.5 text-muted-foreground group-hover:text-primary transition ml-auto mt-auto" />
+              </Link>
+            ))}
+          </div>
+        </section>
+
+        {/* ── Live Alerts ─────────────────────────────────────────── */}
+        <section>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Radio className="h-4 w-4 text-destructive animate-glow-pulse" />
+              <span className="text-xs tracking-[0.25em] uppercase text-muted-foreground">Live Alerts</span>
+              <span className="text-[9px] px-1.5 py-0.5 rounded bg-destructive/20 text-destructive border border-destructive/40 animate-glow-pulse font-semibold">LIVE</span>
             </div>
-          </Panel>
-
-          <Panel title="High-Risk Districts" subtitle="Ranked by AI risk score">
-            <ul className="space-y-2">
-              {[...districts].sort((a, b) => b.risk - a.risk).slice(0, 6).map((d, i) => (
-                <li key={d.name} className="flex items-center gap-3">
-                  <span className="text-[10px] w-5 tabular-nums text-muted-foreground">#{i + 1}</span>
-                  <span className="flex-1 text-sm">{d.name}</span>
-                  <div className="w-24 h-1.5 rounded-full bg-input overflow-hidden">
-                    <div className="h-full bg-gradient-to-r from-primary to-destructive" style={{ width: `${d.risk}%` }} />
-                  </div>
-                  <span className="text-xs tabular-nums text-primary w-8 text-right">{d.risk}</span>
-                </li>
-              ))}
-            </ul>
-          </Panel>
-        </div>
-      </div>
-
-      {/* trends */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <Panel title="Crime Trend · 30 Days" subtitle="Category-wise incident volume" className="lg:col-span-2">
-          <div className="h-64">
-            <ResponsiveContainer>
-              <AreaChart data={crimeTrend}>
-                <defs>
-                  {["theft", "assault", "cyber", "narcotics"].map((k, i) => (
-                    <linearGradient key={k} id={`g-${k}`} x1="0" x2="0" y1="0" y2="1">
-                      <stop offset="0%" stopColor={`oklch(${0.7 - i * 0.05} 0.2 ${230 - i * 30})`} stopOpacity={0.6} />
-                      <stop offset="100%" stopColor={`oklch(${0.7 - i * 0.05} 0.2 ${230 - i * 30})`} stopOpacity={0} />
-                    </linearGradient>
-                  ))}
-                </defs>
-                <CartesianGrid stroke="oklch(0.4 0.03 240 / 0.2)" strokeDasharray="3 3" />
-                <XAxis dataKey="day" stroke="oklch(0.6 0.03 240)" fontSize={10} />
-                <YAxis stroke="oklch(0.6 0.03 240)" fontSize={10} />
-                <Tooltip contentStyle={tooltipStyle} />
-                <Legend wrapperStyle={{ fontSize: 11 }} />
-                <Area type="monotone" dataKey="theft" stroke="oklch(0.7 0.2 230)" fill="url(#g-theft)" strokeWidth={2} />
-                <Area type="monotone" dataKey="assault" stroke="oklch(0.65 0.2 200)" fill="url(#g-assault)" strokeWidth={2} />
-                <Area type="monotone" dataKey="cyber" stroke="oklch(0.6 0.2 170)" fill="url(#g-cyber)" strokeWidth={2} />
-                <Area type="monotone" dataKey="narcotics" stroke="oklch(0.55 0.2 140)" fill="url(#g-narcotics)" strokeWidth={2} />
-              </AreaChart>
-            </ResponsiveContainer>
+            <span className="text-xs text-muted-foreground">{liveAlerts.length} active</span>
           </div>
-        </Panel>
-
-        <Panel title="Hourly Incident Distribution" subtitle="Rolling 24h · statewide">
-          <div className="h-64">
-            <ResponsiveContainer>
-              <BarChart data={hourly}>
-                <CartesianGrid stroke="oklch(0.4 0.03 240 / 0.2)" strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="hour" stroke="oklch(0.6 0.03 240)" fontSize={9} interval={2} />
-                <YAxis stroke="oklch(0.6 0.03 240)" fontSize={10} />
-                <Tooltip contentStyle={tooltipStyle} />
-                <Bar dataKey="incidents" radius={[4, 4, 0, 0]}>
-                  {hourly.map((h, i) => (
-                    <Cell key={i} fill={h.incidents > 40 ? "oklch(0.65 0.24 25)" : "oklch(0.72 0.18 235)"} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {liveAlerts.map((a) => (
+              <div
+                key={a.id}
+                className={cn(
+                  "rounded-2xl border bg-card/50 backdrop-blur-xl p-4 text-sm space-y-2 hover:bg-card/70 transition",
+                  a.level === "critical" && "border-destructive/40 bg-destructive/5",
+                  a.level === "high" && "border-orange-400/30 bg-orange-400/5",
+                  a.level === "medium" && "border-yellow-400/30 bg-yellow-400/5",
+                )}
+              >
+                <div className="flex items-center justify-between">
+                  <span
+                    className={cn(
+                      "text-[10px] font-bold tracking-widest uppercase",
+                      a.level === "critical" && "text-destructive",
+                      a.level === "high" && "text-orange-400",
+                      a.level === "medium" && "text-yellow-400",
+                    )}
+                  >
+                    {a.level}
+                  </span>
+                  <span className="text-[10px] text-muted-foreground">{a.ago} ago</span>
+                </div>
+                <div className="font-semibold leading-tight">{a.title}</div>
+                <div className="text-muted-foreground text-xs">{a.where}</div>
+              </div>
+            ))}
           </div>
-        </Panel>
+        </section>
+
+        {/* ── System status bar ───────────────────────────────────── */}
+        <section className="rounded-2xl border border-border/60 bg-card/40 backdrop-blur-xl p-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center text-xs">
+            {[
+              { label: "Total Incidents (State)", value: "84,512", icon: Shield },
+              { label: "Active Districts", value: "31 / 31", icon: MapIcon },
+              { label: "AI Model Confidence", value: "87%", icon: Brain },
+              { label: "Data Feed", value: "12,480 evt/min", icon: Zap },
+            ].map(({ label, value, icon: Icon }) => (
+              <div key={label} className="flex flex-col items-center gap-1">
+                <Icon className="h-4 w-4 text-primary mb-1" />
+                <div className="text-xl font-bold tabular-nums text-glow">{value}</div>
+                <div className="text-muted-foreground">{label}</div>
+              </div>
+            ))}
+          </div>
+        </section>
       </div>
     </div>
   );
 }
-
-const tooltipStyle = {
-  background: "oklch(0.18 0.03 250 / 0.95)",
-  border: "1px solid oklch(0.72 0.18 235 / 0.5)",
-  borderRadius: 12,
-  fontSize: 11,
-  color: "oklch(0.97 0.01 240)",
-};

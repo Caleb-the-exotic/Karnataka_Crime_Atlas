@@ -9,109 +9,29 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as VictimsRouteImport } from './routes/victims'
-import { Route as TrendsRouteImport } from './routes/trends'
-import { Route as SuspectsRouteImport } from './routes/suspects'
-import { Route as SociologyRouteImport } from './routes/sociology'
-import { Route as SettingsRouteImport } from './routes/settings'
-import { Route as ReportsRouteImport } from './routes/reports'
-import { Route as PredictiveRouteImport } from './routes/predictive'
-import { Route as NetworkRouteImport } from './routes/network'
-import { Route as InvestigationRouteImport } from './routes/investigation'
-import { Route as IntelligenceRouteImport } from './routes/intelligence'
-import { Route as HotspotsRouteImport } from './routes/hotspots'
-import { Route as DataImportRouteImport } from './routes/data-import'
-import { Route as CrimeMapRouteImport } from './routes/crime-map'
-import { Route as CrimeAnalyticsRouteImport } from './routes/crime-analytics'
-import { Route as CasesRouteImport } from './routes/cases'
-import { Route as AnomalyRouteImport } from './routes/anomaly'
-import { Route as AiInsightsRouteImport } from './routes/ai-insights'
-import { Route as AdvancedAnalyticsRouteImport } from './routes/advanced-analytics'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdvancedAnalyticsRouteImport } from './routes/advanced-analytics'
+import { Route as AiInsightsRouteImport } from './routes/ai-insights'
+import { Route as AnomalyRouteImport } from './routes/anomaly'
+import { Route as CasesRouteImport } from './routes/cases'
+import { Route as CrimeAnalyticsRouteImport } from './routes/crime-analytics'
+import { Route as CrimeMapRouteImport } from './routes/crime-map'
+import { Route as DataImportRouteImport } from './routes/data-import'
+import { Route as HotspotsRouteImport } from './routes/hotspots'
+import { Route as IntelligenceRouteImport } from './routes/intelligence'
+import { Route as InvestigationRouteImport } from './routes/investigation'
+import { Route as NetworkRouteImport } from './routes/network'
+import { Route as PredictiveRouteImport } from './routes/predictive'
+import { Route as ReportsRouteImport } from './routes/reports'
+import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as SociologyRouteImport } from './routes/sociology'
+import { Route as SuspectsRouteImport } from './routes/suspects'
+import { Route as TrendsRouteImport } from './routes/trends'
+import { Route as VictimsRouteImport } from './routes/victims'
 
-const VictimsRoute = VictimsRouteImport.update({
-  id: '/victims',
-  path: '/victims',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TrendsRoute = TrendsRouteImport.update({
-  id: '/trends',
-  path: '/trends',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SuspectsRoute = SuspectsRouteImport.update({
-  id: '/suspects',
-  path: '/suspects',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SociologyRoute = SociologyRouteImport.update({
-  id: '/sociology',
-  path: '/sociology',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SettingsRoute = SettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ReportsRoute = ReportsRouteImport.update({
-  id: '/reports',
-  path: '/reports',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PredictiveRoute = PredictiveRouteImport.update({
-  id: '/predictive',
-  path: '/predictive',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const NetworkRoute = NetworkRouteImport.update({
-  id: '/network',
-  path: '/network',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const InvestigationRoute = InvestigationRouteImport.update({
-  id: '/investigation',
-  path: '/investigation',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const IntelligenceRoute = IntelligenceRouteImport.update({
-  id: '/intelligence',
-  path: '/intelligence',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const HotspotsRoute = HotspotsRouteImport.update({
-  id: '/hotspots',
-  path: '/hotspots',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DataImportRoute = DataImportRouteImport.update({
-  id: '/data-import',
-  path: '/data-import',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CrimeMapRoute = CrimeMapRouteImport.update({
-  id: '/crime-map',
-  path: '/crime-map',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CrimeAnalyticsRoute = CrimeAnalyticsRouteImport.update({
-  id: '/crime-analytics',
-  path: '/crime-analytics',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CasesRoute = CasesRouteImport.update({
-  id: '/cases',
-  path: '/cases',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AnomalyRoute = AnomalyRouteImport.update({
-  id: '/anomaly',
-  path: '/anomaly',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AiInsightsRoute = AiInsightsRouteImport.update({
-  id: '/ai-insights',
-  path: '/ai-insights',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdvancedAnalyticsRoute = AdvancedAnalyticsRouteImport.update({
@@ -119,9 +39,89 @@ const AdvancedAnalyticsRoute = AdvancedAnalyticsRouteImport.update({
   path: '/advanced-analytics',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const AiInsightsRoute = AiInsightsRouteImport.update({
+  id: '/ai-insights',
+  path: '/ai-insights',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AnomalyRoute = AnomalyRouteImport.update({
+  id: '/anomaly',
+  path: '/anomaly',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CasesRoute = CasesRouteImport.update({
+  id: '/cases',
+  path: '/cases',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CrimeAnalyticsRoute = CrimeAnalyticsRouteImport.update({
+  id: '/crime-analytics',
+  path: '/crime-analytics',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CrimeMapRoute = CrimeMapRouteImport.update({
+  id: '/crime-map',
+  path: '/crime-map',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DataImportRoute = DataImportRouteImport.update({
+  id: '/data-import',
+  path: '/data-import',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HotspotsRoute = HotspotsRouteImport.update({
+  id: '/hotspots',
+  path: '/hotspots',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IntelligenceRoute = IntelligenceRouteImport.update({
+  id: '/intelligence',
+  path: '/intelligence',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InvestigationRoute = InvestigationRouteImport.update({
+  id: '/investigation',
+  path: '/investigation',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NetworkRoute = NetworkRouteImport.update({
+  id: '/network',
+  path: '/network',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PredictiveRoute = PredictiveRouteImport.update({
+  id: '/predictive',
+  path: '/predictive',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReportsRoute = ReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SociologyRoute = SociologyRouteImport.update({
+  id: '/sociology',
+  path: '/sociology',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SuspectsRoute = SuspectsRouteImport.update({
+  id: '/suspects',
+  path: '/suspects',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TrendsRoute = TrendsRouteImport.update({
+  id: '/trends',
+  path: '/trends',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VictimsRoute = VictimsRouteImport.update({
+  id: '/victims',
+  path: '/victims',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -279,123 +279,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/victims': {
-      id: '/victims'
-      path: '/victims'
-      fullPath: '/victims'
-      preLoaderRoute: typeof VictimsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/trends': {
-      id: '/trends'
-      path: '/trends'
-      fullPath: '/trends'
-      preLoaderRoute: typeof TrendsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/suspects': {
-      id: '/suspects'
-      path: '/suspects'
-      fullPath: '/suspects'
-      preLoaderRoute: typeof SuspectsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sociology': {
-      id: '/sociology'
-      path: '/sociology'
-      fullPath: '/sociology'
-      preLoaderRoute: typeof SociologyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/settings': {
-      id: '/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof SettingsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/reports': {
-      id: '/reports'
-      path: '/reports'
-      fullPath: '/reports'
-      preLoaderRoute: typeof ReportsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/predictive': {
-      id: '/predictive'
-      path: '/predictive'
-      fullPath: '/predictive'
-      preLoaderRoute: typeof PredictiveRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/network': {
-      id: '/network'
-      path: '/network'
-      fullPath: '/network'
-      preLoaderRoute: typeof NetworkRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/investigation': {
-      id: '/investigation'
-      path: '/investigation'
-      fullPath: '/investigation'
-      preLoaderRoute: typeof InvestigationRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/intelligence': {
-      id: '/intelligence'
-      path: '/intelligence'
-      fullPath: '/intelligence'
-      preLoaderRoute: typeof IntelligenceRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/hotspots': {
-      id: '/hotspots'
-      path: '/hotspots'
-      fullPath: '/hotspots'
-      preLoaderRoute: typeof HotspotsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/data-import': {
-      id: '/data-import'
-      path: '/data-import'
-      fullPath: '/data-import'
-      preLoaderRoute: typeof DataImportRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/crime-map': {
-      id: '/crime-map'
-      path: '/crime-map'
-      fullPath: '/crime-map'
-      preLoaderRoute: typeof CrimeMapRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/crime-analytics': {
-      id: '/crime-analytics'
-      path: '/crime-analytics'
-      fullPath: '/crime-analytics'
-      preLoaderRoute: typeof CrimeAnalyticsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/cases': {
-      id: '/cases'
-      path: '/cases'
-      fullPath: '/cases'
-      preLoaderRoute: typeof CasesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/anomaly': {
-      id: '/anomaly'
-      path: '/anomaly'
-      fullPath: '/anomaly'
-      preLoaderRoute: typeof AnomalyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/ai-insights': {
-      id: '/ai-insights'
-      path: '/ai-insights'
-      fullPath: '/ai-insights'
-      preLoaderRoute: typeof AiInsightsRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/advanced-analytics': {
@@ -405,11 +293,123 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdvancedAnalyticsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/ai-insights': {
+      id: '/ai-insights'
+      path: '/ai-insights'
+      fullPath: '/ai-insights'
+      preLoaderRoute: typeof AiInsightsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/anomaly': {
+      id: '/anomaly'
+      path: '/anomaly'
+      fullPath: '/anomaly'
+      preLoaderRoute: typeof AnomalyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cases': {
+      id: '/cases'
+      path: '/cases'
+      fullPath: '/cases'
+      preLoaderRoute: typeof CasesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/crime-analytics': {
+      id: '/crime-analytics'
+      path: '/crime-analytics'
+      fullPath: '/crime-analytics'
+      preLoaderRoute: typeof CrimeAnalyticsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/crime-map': {
+      id: '/crime-map'
+      path: '/crime-map'
+      fullPath: '/crime-map'
+      preLoaderRoute: typeof CrimeMapRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/data-import': {
+      id: '/data-import'
+      path: '/data-import'
+      fullPath: '/data-import'
+      preLoaderRoute: typeof DataImportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hotspots': {
+      id: '/hotspots'
+      path: '/hotspots'
+      fullPath: '/hotspots'
+      preLoaderRoute: typeof HotspotsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/intelligence': {
+      id: '/intelligence'
+      path: '/intelligence'
+      fullPath: '/intelligence'
+      preLoaderRoute: typeof IntelligenceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/investigation': {
+      id: '/investigation'
+      path: '/investigation'
+      fullPath: '/investigation'
+      preLoaderRoute: typeof InvestigationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/network': {
+      id: '/network'
+      path: '/network'
+      fullPath: '/network'
+      preLoaderRoute: typeof NetworkRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/predictive': {
+      id: '/predictive'
+      path: '/predictive'
+      fullPath: '/predictive'
+      preLoaderRoute: typeof PredictiveRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reports': {
+      id: '/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof ReportsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sociology': {
+      id: '/sociology'
+      path: '/sociology'
+      fullPath: '/sociology'
+      preLoaderRoute: typeof SociologyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/suspects': {
+      id: '/suspects'
+      path: '/suspects'
+      fullPath: '/suspects'
+      preLoaderRoute: typeof SuspectsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/trends': {
+      id: '/trends'
+      path: '/trends'
+      fullPath: '/trends'
+      preLoaderRoute: typeof TrendsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/victims': {
+      id: '/victims'
+      path: '/victims'
+      fullPath: '/victims'
+      preLoaderRoute: typeof VictimsRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -439,3 +439,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
