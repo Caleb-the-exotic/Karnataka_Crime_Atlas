@@ -76,3 +76,48 @@ export const kpis = [
   { key: "wanted", label: "Wanted Criminals", value: 284, delta: -1.2, spark: [30,29,28,27,28,27,26,25,26,25,24,23] },
   { key: "solved", label: "Solved Cases", value: 39210, delta: +5.7, spark: [10,14,18,22,26,30,34,38,42,46,50,54] },
 ];
+
+export function recordSubmittedComplaint(categoryName: string) {
+  // 1. Increment Total Crimes (YTD) & Today's Crimes in KPIs
+  const totalKpi = kpis.find((k) => k.key === "total");
+  if (totalKpi) {
+    totalKpi.value += 1;
+    totalKpi.spark[totalKpi.spark.length - 1] += 1;
+  }
+
+  const todayKpi = kpis.find((k) => k.key === "today");
+  if (todayKpi) {
+    todayKpi.value += 1;
+    todayKpi.spark[todayKpi.spark.length - 1] += 1;
+  }
+
+  const activeKpi = kpis.find((k) => k.key === "active");
+  if (activeKpi) {
+    activeKpi.value += 1;
+  }
+
+  // 2. Increment crime category total
+  const cat = crimeCategories.find((c) => c.name.toLowerCase() === categoryName.toLowerCase());
+  if (cat) {
+    cat.value += 1;
+  } else {
+    crimeCategories.push({ name: categoryName, value: 1 });
+  }
+
+  // 3. Increment crime trend for today (last element of 30d trend)
+  const lastTrendDay = crimeTrend[crimeTrend.length - 1];
+  if (lastTrendDay) {
+    const key = categoryName.toLowerCase() as keyof typeof lastTrendDay;
+    if (typeof lastTrendDay[key] === "number") {
+      (lastTrendDay[key] as number) += 1;
+    } else {
+      (lastTrendDay as any)[categoryName.toLowerCase()] = 1;
+    }
+  }
+
+  // 4. Increment hourly chart for current hour
+  const curHour = new Date().getHours();
+  if (hourly[curHour]) {
+    hourly[curHour].incidents += 1;
+  }
+}

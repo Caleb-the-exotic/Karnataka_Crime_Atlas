@@ -5,6 +5,7 @@ import { FileText, FileSpreadsheet, Presentation, Download, Loader2, Send, X, Al
 import { toast } from "sonner";
 import { exportPDF, exportExcel, exportCSV, exportPPTX, exportJSON, type ReportPayload, type ReportTable } from "@/lib/ciap/export";
 import { districtGeo, incidents, hotspots, crimeCategoryList } from "@/lib/ciap/geo";
+import { recordSubmittedComplaint } from "@/lib/ciap-data";
 
 export const Route = createFileRoute("/reports")({
   head: () => ({ meta: [{ title: "CIAP · Reports" }, { name: "description", content: "Real multi-format executive reports — PDF, Excel, CSV, PowerPoint." }] }),
@@ -97,6 +98,9 @@ function ReportsPage() {
           daysAgo: 0, // Today
           hour: new Date().getHours(),
         });
+
+        // Update all KPI cards, category volume, 30-day trend, and hourly charts
+        recordSubmittedComplaint(formData.category);
 
         toast.success("Complaint submitted successfully! Analytics updated.");
         setComplaintOpen(false);
