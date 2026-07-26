@@ -635,6 +635,7 @@ function FloatingAI({ open, onOpenChange }: { open: boolean; onOpenChange: (v: b
   const ask = useMemo(() => async (raw: string) => {
     const q = raw.trim();
     if (!q) return;
+    setInput("");
     setMessages((m) => [...m, { role: "user", content: q, ts: Date.now() }]);
     setBusy(true);
     try {
@@ -645,7 +646,6 @@ function FloatingAI({ open, onOpenChange }: { open: boolean; onOpenChange: (v: b
       setMessages((m) => [...m, { role: "assistant", content: fallback, ts: Date.now() }]);
     } finally {
       setBusy(false);
-      setInput("");
       requestAnimationFrame(() => scrollRef.current?.scrollTo({ top: 1e9, behavior: "smooth" }));
     }
   }, []);

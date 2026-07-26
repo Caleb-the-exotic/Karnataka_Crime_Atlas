@@ -82,7 +82,23 @@ function ReportsPage() {
         body: JSON.stringify(formData),
       });
       if (res.ok) {
-        toast.success("Complaint submitted successfully! An email has been sent.");
+        // Increment analytics dynamically: add incident with daysAgo: 0 (today)
+        const targetDistrict = districtGeo.find((d) => d.name === formData.district);
+        if (targetDistrict) {
+          targetDistrict.crimes += 1;
+        }
+        incidents.unshift({
+          id: `INC-${(incidents.length + 1).toString().padStart(5, "0")}`,
+          position: targetDistrict ? targetDistrict.position : [12.9716, 77.5946],
+          district: formData.district,
+          category: formData.category as any,
+          severity: "High",
+          weight: 0.85,
+          daysAgo: 0, // Today
+          hour: new Date().getHours(),
+        });
+
+        toast.success("Complaint submitted successfully! Analytics updated.");
         setComplaintOpen(false);
         setFormData({ name: "", email: "", phone: "", district: districtGeo[0]?.name || "Bengaluru Urban", category: crimeCategoryList[0] || "Theft", details: "" });
       } else {
@@ -240,7 +256,7 @@ function ReportsPage() {
                 className="w-full flex items-center justify-center gap-2 rounded-xl bg-destructive text-destructive-foreground px-4 py-2.5 text-sm font-semibold hover:bg-destructive/90 transition disabled:opacity-50"
               >
                 {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                <span>Submit Complaint (Formspree Mail)</span>
+                <span>Submit Complaint</span>
               </button>
             </form>
           </div>
