@@ -150,7 +150,6 @@ function AnalyticsHub() {
           </div>
 
           <CrimeAnalytics />
-          <SociologyPage />
         </div>
       </TabPanel>
       <TabPanel active={tab === "advanced"}><AdvancedAnalytics /></TabPanel>
@@ -158,8 +157,6 @@ function AnalyticsHub() {
       <TabPanel active={tab === "anomalies"}><Anomaly /></TabPanel>
       <TabPanel active={tab === "correlation"}>
         <div className="space-y-6">
-          <PageHeader eyebrow="CORRELATION" title="Socio-Crime Correlation Analysis" description="Pearson correlations between socio-economic indicators and crime intensity." />
-          <EChart title="Correlation Matrix" subtitle="Pearson r · socio-economic vs crime" option={correlationOption()} height={480} />
           <SociologyPage />
         </div>
       </TabPanel>
