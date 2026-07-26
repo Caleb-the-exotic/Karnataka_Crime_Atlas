@@ -1,0 +1,10 @@
+{
+  "homepage": "index.html",
+  "redirects": [
+    {
+      "source": "/*",
+      "target": "/index.html",
+      "status": 200
+    }
+  ]
+}
