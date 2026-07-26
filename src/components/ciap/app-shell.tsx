@@ -131,60 +131,62 @@ function TopBar({ now, onCmd, onHelp, onAi, sidebarOpen, onToggleSidebar, user, 
 
   return (
     <header className="fixed inset-x-0 top-0 z-40 h-16 border-b border-border/60 backdrop-blur-2xl bg-background/70">
-      <div className="flex h-full items-center gap-3 px-4">
+      <div className="relative flex h-full items-center justify-between px-4">
 
         {/* Hamburger */}
         <button
           onClick={onToggleSidebar}
           aria-label={sidebarOpen ? "Close sidebar" : "Open sidebar"}
-          className="rounded-xl border border-border/60 p-2 hover:border-primary/60 hover:bg-primary/10 transition"
+          className="rounded-xl border border-border/60 p-2 hover:border-primary/60 hover:bg-primary/10 transition z-10"
         >
           <Menu className="h-4 w-4" />
         </button>
 
-        {/* Centre title */}
-        <div className="flex-1 flex items-center justify-center gap-3 select-none pointer-events-none">
-          <ChevronLeft className="h-6 w-6 text-primary" />
-          <span className="italic font-bold tracking-wider text-xl text-foreground" style={{ fontFamily: '"Geist", sans-serif' }}>Karnataka CIAP</span>
-          <ChevronRightIcon className="h-6 w-6 text-primary" />
+        {/* Absolutely Centred Title — Fixed position across all pages & auth states */}
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center gap-3 select-none pointer-events-none z-10">
+          <ChevronLeft className="h-6 w-6 text-primary shrink-0" />
+          <span className="italic font-bold tracking-wider text-xl text-foreground whitespace-nowrap" style={{ fontFamily: '"Geist", sans-serif' }}>Karnataka CIAP</span>
+          <ChevronRightIcon className="h-6 w-6 text-primary shrink-0" />
         </div>
 
         {/* User area */}
-        {user ? (
-          <div className="relative">
+        <div className="z-10">
+          {user ? (
+            <div className="relative">
+              <button
+                onClick={() => setProfileOpen((v) => !v)}
+                className="flex items-center gap-2 rounded-xl border border-border/60 bg-card/60 pl-2 pr-3 py-1.5 hover:border-primary/50 transition"
+              >
+                <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-primary to-accent grid place-items-center text-[11px] font-bold text-primary-foreground">
+                  {user.initials}
+                </div>
+                <div className="hidden md:block text-xs leading-tight text-left">
+                  <div className="font-medium">{user.name}</div>
+                  <div className="text-muted-foreground text-[10px]">SCRB · Cmd Ctr</div>
+                </div>
+              </button>
+              {profileOpen && (
+                <div className="absolute right-0 top-full mt-2 w-52 rounded-2xl border border-border/60 bg-popover/95 backdrop-blur-xl shadow-xl p-2 z-50">
+                  <div className="px-3 py-2 text-xs text-muted-foreground border-b border-border/40 mb-1">{user.email}</div>
+                  <button
+                    onClick={() => { setProfileOpen(false); onLogout(); }}
+                    className="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-secondary/60 text-destructive transition"
+                  >
+                    Sign out
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
             <button
-              onClick={() => setProfileOpen((v) => !v)}
-              className="flex items-center gap-2 rounded-xl border border-border/60 bg-card/60 pl-2 pr-3 py-1.5 hover:border-primary/50 transition"
+              onClick={onLoginClick}
+              className="flex items-center gap-2 rounded-xl border border-primary/40 bg-primary/10 px-3 py-2 text-sm text-primary hover:bg-primary/20 transition"
             >
-              <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-primary to-accent grid place-items-center text-[11px] font-bold text-primary-foreground">
-                {user.initials}
-              </div>
-              <div className="hidden md:block text-xs leading-tight text-left">
-                <div className="font-medium">{user.name}</div>
-                <div className="text-muted-foreground text-[10px]">SCRB · Cmd Ctr</div>
-              </div>
+              <LogIn className="h-4 w-4" />
+              <span className="hidden sm:inline">Login</span>
             </button>
-            {profileOpen && (
-              <div className="absolute right-0 top-full mt-2 w-52 rounded-2xl border border-border/60 bg-popover/95 backdrop-blur-xl shadow-xl p-2 z-50">
-                <div className="px-3 py-2 text-xs text-muted-foreground border-b border-border/40 mb-1">{user.email}</div>
-                <button
-                  onClick={() => { setProfileOpen(false); onLogout(); }}
-                  className="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-secondary/60 text-destructive transition"
-                >
-                  Sign out
-                </button>
-              </div>
-            )}
-          </div>
-        ) : (
-          <button
-            onClick={onLoginClick}
-            className="flex items-center gap-2 rounded-xl border border-primary/40 bg-primary/10 px-3 py-2 text-sm text-primary hover:bg-primary/20 transition"
-          >
-            <LogIn className="h-4 w-4" />
-            <span className="hidden sm:inline">Login</span>
-          </button>
-        )}
+          )}
+        </div>
       </div>
     </header>
   );

@@ -43,19 +43,14 @@ function Dashboard() {
         <div className="absolute inset-0 bg-gradient-to-b from-background/30 via-transparent to-background/80 pointer-events-none" />
 
         {/* Centred text content */}
-        <div className="relative z-10 flex flex-col items-center justify-center h-full gap-6 px-6 text-center">
-          <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight uppercase" style={{ fontFamily: '"Geist", sans-serif' }}>
-            Crime Intelligence Atlas Platform
-          </h1>
+        <div className="relative z-10 flex flex-col items-center justify-between h-full py-16 px-6 text-center">
+          <div className="mt-8">
+            <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight uppercase" style={{ fontFamily: '"Geist", sans-serif' }}>
+              Crime Intelligence Atlas Platform
+            </h1>
+          </div>
 
-          <p className="text-muted-foreground text-lg max-w-xl leading-relaxed">
-            Unified live view across <span className="text-foreground font-medium">31 districts</span>,{" "}
-            <span className="text-foreground font-medium">1,247 police stations</span> and{" "}
-            <span className="text-foreground font-medium">84.5K incidents</span>.
-            AI models updated 4 min ago.
-          </p>
-
-          <div className="flex items-center gap-3 flex-wrap justify-center">
+          <div className="mt-auto flex items-center gap-3 flex-wrap justify-center">
             <Link
               to="/crime-map"
               className="flex items-center gap-2 rounded-xl bg-primary text-primary-foreground px-5 py-2.5 text-sm font-semibold hover:bg-primary/90 transition shadow-lg"
@@ -66,7 +61,7 @@ function Dashboard() {
               to="/intelligence"
               className="flex items-center gap-2 rounded-xl border border-primary/40 bg-primary/10 text-primary px-5 py-2.5 text-sm font-semibold hover:bg-primary/20 transition"
             >
-              <Brain className="h-4 w-4" /> Intelligence Hub
+              <Brain className="h-4 w-4" /> Analytics Hub
             </Link>
           </div>
         </div>
