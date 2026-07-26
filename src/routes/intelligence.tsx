@@ -37,9 +37,7 @@ const TABS = [
   { id: "overview", label: "Overview", icon: LayoutGrid },
   { id: "advanced", label: "Advanced Analytics", icon: Sigma },
   { id: "predictions", label: "Predictions", icon: Brain },
-  { id: "trends", label: "Trends", icon: TrendingUp },
   { id: "anomalies", label: "Anomalies", icon: AlertTriangle },
-  { id: "socio", label: "Socio-economic", icon: HeartPulse },
   { id: "correlation", label: "Correlation Analysis", icon: PieChart },
 ];
 
@@ -152,13 +150,12 @@ function AnalyticsHub() {
           </div>
 
           <CrimeAnalytics />
+          <SociologyPage />
         </div>
       </TabPanel>
       <TabPanel active={tab === "advanced"}><AdvancedAnalytics /></TabPanel>
       <TabPanel active={tab === "predictions"}><Predictive /></TabPanel>
-      <TabPanel active={tab === "trends"}><Trends /></TabPanel>
       <TabPanel active={tab === "anomalies"}><Anomaly /></TabPanel>
-      <TabPanel active={tab === "socio"}><SociologyPage /></TabPanel>
       <TabPanel active={tab === "correlation"}>
         <div className="space-y-6">
           <PageHeader eyebrow="CORRELATION" title="Socio-Crime Correlation Analysis" description="Pearson correlations between socio-economic indicators and crime intensity." />

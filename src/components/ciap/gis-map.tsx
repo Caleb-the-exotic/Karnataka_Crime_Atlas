@@ -93,7 +93,38 @@ export function GisMap({ height = 640, compact = false, className, showLayerCont
   const [playing, setPlaying] = useState(false);
   const [query, setQuery] = useState("");
   const [searching, setSearching] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const [measure, setMeasure] = useState<string | null>(null);
+
+  const suggestions = useMemo(() => {
+    if (!query.trim()) return [];
+    const q = query.toLowerCase();
+    const list: { name: string; type: string; pos: [number, number] }[] = [];
+    districtGeo.forEach((d) => {
+      if (d.name.toLowerCase().includes(q)) {
+        const sample = incidents.find((i) => i.district === d.name);
+        list.push({ name: `${d.name} (District)`, type: "District", pos: sample ? sample.position : KARNATAKA_CENTER });
+      }
+    });
+    policeStations.forEach((s) => {
+      if (s.name.toLowerCase().includes(q)) {
+        list.push({ name: s.name, type: "Station", pos: s.position });
+      }
+    });
+    hotspots.forEach((h) => {
+      if (h.name.toLowerCase().includes(q)) {
+        list.push({ name: h.name, type: "Hotspot", pos: h.position });
+      }
+    });
+    return list.slice(0, 8);
+  }, [query]);
+
+  const selectLocation = (item: { name: string; pos: [number, number] }) => {
+    const map = mapRef.current;
+    if (!map) return;
+    map.flyTo(item.pos, 13, { duration: 1.2 });
+    toast.success(`Located ${item.name}`);
+  };
 
   const filtered = useMemo<Incident[]>(
     () => incidents.filter((i) => categories.includes(i.category) && i.daysAgo <= dayWindow),
@@ -442,25 +473,17 @@ export function GisMap({ height = 640, compact = false, className, showLayerCont
             })}
           </div>
 
-          <div className="flex items-center gap-2 rounded-lg border border-border bg-input/40 px-2 py-1.5">
-            <Search className="h-3.5 w-3.5 text-muted-foreground" />
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && runSearch()}
-              placeholder="Search district, station or address…"
-              aria-label="Search location on map"
-              className="w-56 bg-transparent text-[11px] outline-none placeholder:text-muted-foreground"
-            />
-            <button onClick={runSearch} disabled={searching} className="text-[10px] text-primary hover:underline">
-              {searching ? "…" : "Go"}
-            </button>
-          </div>
-
           <ToolBtn active={showHeat} onClick={() => setShowHeat((v) => !v)} icon={Flame} label="Heatmap" />
           <ToolBtn active={showClusters} onClick={() => setShowClusters((v) => !v)} icon={Crosshair} label="Cluster" />
 
-          <div className="flex items-center gap-2 rounded-lg border border-border bg-input/40 px-2.5 py-1.5 text-[11px]">
+          <button onClick={clearDrawings} className="flex items-center gap-1 rounded-lg border border-border px-2.5 py-1.5 text-[11px] text-muted-foreground hover:border-destructive/60 hover:text-destructive transition">
+            <Trash2 className="h-3.5 w-3.5" /> Clear
+          </button>
+          <button onClick={exportView} className="flex items-center gap-1 rounded-lg border border-border px-2.5 py-1.5 text-[11px] text-muted-foreground hover:border-primary/60 hover:text-primary transition">
+            <Download className="h-3.5 w-3.5" /> GeoJSON
+          </button>
+
+          <div className="flex items-center gap-2 rounded-lg border border-border bg-input/40 px-2.5 py-1.5 text-[11px] ml-auto">
             <span className="text-muted-foreground">Heat opacity</span>
             <input
               type="range" min={0.1} max={1} step={0.05} value={heatOpacity}
@@ -469,20 +492,6 @@ export function GisMap({ height = 640, compact = false, className, showLayerCont
               className="w-24 accent-[var(--color-primary)]"
             />
             <span className="tabular-nums text-primary w-8">{Math.round(heatOpacity * 100)}%</span>
-          </div>
-
-          <div className="ml-auto flex items-center gap-2">
-            {measure && (
-              <span className="flex items-center gap-1 rounded-lg border border-yellow-400/40 bg-yellow-400/10 px-2 py-1 text-[10px] text-yellow-300">
-                <Ruler className="h-3 w-3" /> {measure}
-              </span>
-            )}
-            <button onClick={clearDrawings} className="flex items-center gap-1 rounded-lg border border-border px-2 py-1.5 text-[11px] text-muted-foreground hover:border-destructive/60 hover:text-destructive transition">
-              <Trash2 className="h-3.5 w-3.5" /> Clear
-            </button>
-            <button onClick={exportView} className="flex items-center gap-1 rounded-lg border border-border px-2 py-1.5 text-[11px] text-muted-foreground hover:border-primary/60 hover:text-primary transition">
-              <Download className="h-3.5 w-3.5" /> GeoJSON
-            </button>
           </div>
         </div>
       )}
@@ -525,24 +534,74 @@ export function GisMap({ height = 640, compact = false, className, showLayerCont
           </div>
         )}
 
-        {/* Timeline playback */}
+        {/* Bottom Overlay: Searchbar + Timeline playback */}
         {!compact && (
-          <div className="absolute inset-x-0 bottom-0 z-[600] flex items-center gap-3 border-t border-border/60 bg-popover/95 backdrop-blur-xl px-4 py-3.5 text-[11px] shadow-xl">
-            <button
-              onClick={() => setPlaying((p) => !p)}
-              aria-label={playing ? "Pause timeline" : "Play timeline"}
-              className="rounded-lg border border-primary/40 bg-primary/15 p-1.5 text-primary hover:bg-primary/25 transition"
-            >
-              {playing ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
-            </button>
-            <span className="text-muted-foreground whitespace-nowrap">Last {dayWindow} days</span>
-            <input
-              type="range" min={3} max={90} step={1} value={dayWindow}
-              onChange={(e) => { setPlaying(false); setDayWindow(Number(e.target.value)); }}
-              aria-label="Timeline window in days"
-              className="flex-1 accent-[var(--color-primary)]"
-            />
-            <span className="tabular-nums text-primary whitespace-nowrap">{filtered.length.toLocaleString()} incidents</span>
+          <div className="absolute inset-x-0 bottom-0 z-[600] flex flex-wrap items-center gap-3 border-t border-border/60 bg-popover/95 backdrop-blur-xl px-4 py-3 text-[11px] shadow-xl">
+            {/* Search Input with Typeahead suggestions */}
+            <div className="relative flex items-center gap-2 rounded-lg border border-border bg-input/60 px-2.5 py-1.5 w-60 sm:w-64">
+              <Search className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+              <input
+                value={query}
+                onChange={(e) => {
+                  setQuery(e.target.value);
+                  setShowSuggestions(true);
+                }}
+                onFocus={() => setShowSuggestions(true)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    setShowSuggestions(false);
+                    runSearch();
+                  }
+                }}
+                placeholder="Search district, station..."
+                className="w-full bg-transparent text-[11px] outline-none placeholder:text-muted-foreground"
+              />
+              <button onClick={runSearch} disabled={searching} className="text-[10px] text-primary hover:underline font-medium">
+                {searching ? "…" : "Go"}
+              </button>
+
+              {/* Suggestions dropdown */}
+              {showSuggestions && suggestions.length > 0 && (
+                <div className="absolute left-0 bottom-full mb-1.5 w-72 rounded-xl border border-border/80 bg-popover/95 backdrop-blur-xl shadow-2xl p-1.5 z-[700] max-h-48 overflow-y-auto">
+                  <div className="px-2 py-1 text-[9px] uppercase tracking-wider text-muted-foreground border-b border-border/40 mb-1">
+                    Matching Locations
+                  </div>
+                  {suggestions.map((item, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => {
+                        setQuery(item.name.split(" (")[0]);
+                        setShowSuggestions(false);
+                        selectLocation(item);
+                      }}
+                      className="w-full flex items-center justify-between rounded-lg px-2 py-1.5 text-left text-xs hover:bg-primary/15 hover:text-primary transition"
+                    >
+                      <span className="font-medium truncate">{item.name}</span>
+                      <span className="text-[9px] text-muted-foreground uppercase px-1.5 py-0.5 rounded bg-secondary">{item.type}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Timeline Controls */}
+            <div className="flex-1 flex items-center gap-3 min-w-[220px]">
+              <button
+                onClick={() => setPlaying((p) => !p)}
+                aria-label={playing ? "Pause timeline" : "Play timeline"}
+                className="rounded-lg border border-primary/40 bg-primary/15 p-1.5 text-primary hover:bg-primary/25 transition"
+              >
+                {playing ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
+              </button>
+              <span className="text-muted-foreground whitespace-nowrap">Last {dayWindow} days</span>
+              <input
+                type="range" min={3} max={90} step={1} value={dayWindow}
+                onChange={(e) => { setPlaying(false); setDayWindow(Number(e.target.value)); }}
+                aria-label="Timeline window in days"
+                className="flex-1 accent-[var(--color-primary)]"
+              />
+              <span className="tabular-nums text-primary whitespace-nowrap font-medium">{filtered.length.toLocaleString()} incidents</span>
+            </div>
           </div>
         )}
       </div>

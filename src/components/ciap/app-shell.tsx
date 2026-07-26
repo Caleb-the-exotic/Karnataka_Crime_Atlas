@@ -293,20 +293,16 @@ function LoginModalBody({ onLogin }: { onLogin: () => void }) {
   const handleCredentialLogin = (e: React.FormEvent) => {
     e.preventDefault();
     if (!username.trim() || !password.trim()) { setError("Please enter username and password."); return; }
-    // Mock credential check — replace with real auth in production
-    if (username === "admin" && password === "ksp2024") {
+    // Mock credential check
+    if (username === "Admin" && password === "Admin@123") {
       onLogin();
     } else {
-      setError("Invalid credentials. Try admin / ksp2024.");
+      setError("Invalid credentials. Try Admin / Admin@123.");
     }
   };
 
   return (
     <div className="p-6 space-y-4">
-      <div className="rounded-xl border border-border/60 bg-secondary/30 p-3 text-xs text-muted-foreground text-center leading-relaxed">
-        Restricted to authorised KSP &amp; SCRB personnel. All activity is monitored.
-      </div>
-
       {/* Username / Password form */}
       <form onSubmit={handleCredentialLogin} className="space-y-3">
         <div>
@@ -315,7 +311,7 @@ function LoginModalBody({ onLogin }: { onLogin: () => void }) {
             type="text"
             value={username}
             onChange={(e) => { setUsername(e.target.value); setError(""); }}
-            placeholder="e.g. admin"
+            placeholder="e.g. Admin"
             className="w-full rounded-xl border border-border bg-input/60 px-3 py-2 text-sm outline-none focus:border-primary transition"
           />
         </div>

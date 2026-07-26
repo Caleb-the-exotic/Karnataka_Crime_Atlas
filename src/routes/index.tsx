@@ -44,9 +44,8 @@ function Dashboard() {
 
         {/* Centred text content */}
         <div className="relative z-10 flex flex-col items-center justify-center h-full gap-6 px-6 text-center">
-          <h1 className="text-5xl md:text-6xl font-bold tracking-tight text-glow leading-tight max-w-3xl" style={{ fontFamily: '"Geist", sans-serif' }}>
-            Crime Intelligence<br />
-            <span className="text-primary">Atlas Platform</span>
+          <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight uppercase" style={{ fontFamily: '"Geist", sans-serif' }}>
+            Crime Intelligence Atlas Platform
           </h1>
 
           <p className="text-muted-foreground text-lg max-w-xl leading-relaxed">
