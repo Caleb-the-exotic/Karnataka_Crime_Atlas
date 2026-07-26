@@ -1,0 +1,697 @@
+// ============================================================
+// CIAP Karnataka Police — Full FIR Database Schema
+// Following the official Karnataka Police FIR ER Diagram
+// Generator: Prisma ORM | Database: PostgreSQL
+// ============================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================
+// REFERENCE / MASTER TABLES
+// ============================================================
+
+model State {
+  StateID   Int        @id @default(autoincrement())
+  StateName String     @unique @db.VarChar(100)
+  StateCode String     @unique @db.VarChar(5)
+  Districts District[]
+
+  @@map("states")
+}
+
+model District {
+  DistrictID   Int            @id @default(autoincrement())
+  StateID      Int
+  DistrictName String         @db.VarChar(100)
+  DistrictCode String         @db.VarChar(10)
+  State        State          @relation(fields: [StateID], references: [StateID], onDelete: Restrict)
+  Units        Unit[]
+  Complaints   Complaint[]
+
+  @@unique([StateID, DistrictCode])
+  @@index([StateID])
+  @@map("districts")
+}
+
+model UnitType {
+  UnitTypeID   Int    @id @default(autoincrement())
+  UnitTypeName String @unique @db.VarChar(50)
+  Units        Unit[]
+
+  @@map("unit_types")
+}
+
+model Unit {
+  UnitID       Int        @id @default(autoincrement())
+  DistrictID   Int
+  UnitTypeID   Int
+  UnitName     String     @db.VarChar(150)
+  UnitCode     String     @db.VarChar(20)
+  Address      String?    @db.Text
+  PhoneNumber  String?    @db.VarChar(20)
+  Latitude     Decimal?   @db.Decimal(10, 8)
+  Longitude    Decimal?   @db.Decimal(11, 8)
+  IsActive     Boolean    @default(true)
+  District     District   @relation(fields: [DistrictID], references: [DistrictID], onDelete: Restrict)
+  UnitType     UnitType   @relation(fields: [UnitTypeID], references: [UnitTypeID], onDelete: Restrict)
+  Cases        CaseMaster[]
+  Employees    Employee[]
+  Complaints   Complaint[]
+
+  @@unique([DistrictID, UnitCode])
+  @@index([DistrictID])
+  @@index([UnitTypeID])
+  @@map("units")
+}
+
+model Rank {
+  RankID   Int        @id @default(autoincrement())
+  RankName String     @unique @db.VarChar(100)
+  RankCode String     @unique @db.VarChar(20)
+  Priority Int        @default(0)
+  Employees Employee[]
+
+  @@map("ranks")
+}
+
+model Designation {
+  DesignationID   Int        @id @default(autoincrement())
+  DesignationName String     @unique @db.VarChar(100)
+  Employees       Employee[]
+
+  @@map("designations")
+}
+
+model Employee {
+  EmployeeID       Int           @id @default(autoincrement())
+  UnitID           Int
+  RankID           Int
+  DesignationID    Int
+  EmployeeNumber   String        @unique @db.VarChar(20)
+  FirstName        String        @db.VarChar(100)
+  LastName         String        @db.VarChar(100)
+  PhoneNumber      String?       @db.VarChar(20)
+  Email            String?       @db.VarChar(150)
+  IsActive         Boolean       @default(true)
+  CreatedAt        DateTime      @default(now())
+  Unit             Unit          @relation(fields: [UnitID], references: [UnitID], onDelete: Restrict)
+  Rank             Rank          @relation(fields: [RankID], references: [RankID], onDelete: Restrict)
+  Designation      Designation   @relation(fields: [DesignationID], references: [DesignationID], onDelete: Restrict)
+  InvestigatedCases CaseMaster[] @relation("InvestigatingOfficer")
+  AssignedComplaints Complaint[]
+
+  @@index([UnitID])
+  @@index([RankID])
+  @@map("employees")
+}
+
+model OccupationMaster {
+  OccupationID   Int       @id @default(autoincrement())
+  OccupationName String    @unique @db.VarChar(150)
+  Complainants   ComplainantDetails[]
+  Victims        Victim[]
+  Accused        Accused[]
+
+  @@map("occupation_master")
+}
+
+model ReligionMaster {
+  ReligionID   Int       @id @default(autoincrement())
+  ReligionName String    @unique @db.VarChar(100)
+  Complainants ComplainantDetails[]
+  Victims      Victim[]
+  Accused      Accused[]
+
+  @@map("religion_master")
+}
+
+model CasteMaster {
+  CasteID   Int       @id @default(autoincrement())
+  CasteName String    @unique @db.VarChar(150)
+  Category  String?   @db.VarChar(10) // SC, ST, OBC, General
+  Complainants ComplainantDetails[]
+  Victims   Victim[]
+  Accused   Accused[]
+
+  @@map("caste_master")
+}
+
+model CaseStatusMaster {
+  StatusID   Int          @id @default(autoincrement())
+  StatusCode String       @unique @db.VarChar(30)
+  StatusName String       @unique @db.VarChar(100)
+  Description String?     @db.Text
+  Cases      CaseMaster[]
+
+  @@map("case_status_master")
+}
+
+// ============================================================
+// ACT & SECTION HIERARCHY
+// ============================================================
+
+model Act {
+  ActID          Int                  @id @default(autoincrement())
+  ActName        String               @db.VarChar(255)
+  ActShortName   String?              @db.VarChar(50)
+  ActYear        Int?
+  IsActive       Boolean              @default(true)
+  Sections       Section[]
+  ActSections    ActSectionAssociation[]
+
+  @@unique([ActName])
+  @@map("acts")
+}
+
+model Section {
+  SectionID      Int                  @id @default(autoincrement())
+  ActID          Int
+  SectionNumber  String               @db.VarChar(50)
+  SectionTitle   String               @db.VarChar(500)
+  Description    String?              @db.Text
+  Bailable       Boolean?
+  Cognizable     Boolean?
+  IsActive       Boolean              @default(true)
+  Act            Act                  @relation(fields: [ActID], references: [ActID], onDelete: Cascade)
+  ActSections    ActSectionAssociation[]
+
+  @@unique([ActID, SectionNumber])
+  @@index([ActID])
+  @@map("sections")
+}
+
+model ActSectionAssociation {
+  AssocID    Int     @id @default(autoincrement())
+  ActID      Int
+  SectionID  Int
+  Act        Act     @relation(fields: [ActID], references: [ActID], onDelete: Cascade)
+  Section    Section @relation(fields: [SectionID], references: [SectionID], onDelete: Cascade)
+
+  @@unique([ActID, SectionID])
+  @@map("act_section_associations")
+}
+
+// ============================================================
+// CRIME HEAD HIERARCHY
+// ============================================================
+
+model CrimeHead {
+  CrimeHeadID      Int               @id @default(autoincrement())
+  CrimeHeadCode    String            @unique @db.VarChar(20)
+  CrimeHeadName    String            @db.VarChar(255)
+  Description      String?           @db.Text
+  IsActive         Boolean           @default(true)
+  SubHeads         CrimeSubHead[]
+  ActSections      CrimeHeadActSection[]
+  Cases            CaseMaster[]
+
+  @@map("crime_heads")
+}
+
+model CrimeSubHead {
+  CrimeSubHeadID   Int         @id @default(autoincrement())
+  CrimeHeadID      Int
+  SubHeadCode      String      @db.VarChar(20)
+  SubHeadName      String      @db.VarChar(255)
+  Description      String?     @db.Text
+  IsActive         Boolean     @default(true)
+  CrimeHead        CrimeHead   @relation(fields: [CrimeHeadID], references: [CrimeHeadID], onDelete: Cascade)
+  Cases            CaseMaster[]
+
+  @@unique([CrimeHeadID, SubHeadCode])
+  @@index([CrimeHeadID])
+  @@map("crime_sub_heads")
+}
+
+model CrimeHeadActSection {
+  ID            Int       @id @default(autoincrement())
+  CrimeHeadID   Int
+  ActID         Int
+  SectionID     Int
+  CrimeHead     CrimeHead @relation(fields: [CrimeHeadID], references: [CrimeHeadID], onDelete: Cascade)
+
+  @@unique([CrimeHeadID, ActID, SectionID])
+  @@index([CrimeHeadID])
+  @@map("crime_head_act_sections")
+}
+
+// ============================================================
+// CASE CATEGORY & GRAVITY
+// ============================================================
+
+model CaseCategory {
+  CategoryID   Int          @id @default(autoincrement())
+  CategoryName String       @unique @db.VarChar(100)
+  CategoryCode String       @unique @db.VarChar(20)
+  Description  String?      @db.Text
+  Cases        CaseMaster[]
+
+  @@map("case_categories")
+}
+
+model GravityOffence {
+  GravityID    Int          @id @default(autoincrement())
+  GravityLevel String       @unique @db.VarChar(20) // LOW, MEDIUM, HIGH, CRITICAL
+  GravityCode  Int          @unique                  // 1-4
+  Description  String?      @db.Text
+  Cases        CaseMaster[]
+
+  @@map("gravity_offences")
+}
+
+// ============================================================
+// CORE FIR / CASE MASTER
+// ============================================================
+
+model CaseMaster {
+  CaseID             Int                 @id @default(autoincrement())
+  UnitID             Int
+  CrimeHeadID        Int?
+  CrimeSubHeadID     Int?
+  CategoryID         Int?
+  GravityID          Int?
+  StatusID           Int?
+  InvestigatingOfficerID Int?
+
+  /// FIR Number — unique per police station per year
+  FIRNumber          String              @db.VarChar(30)
+  FIRDate            DateTime
+  IncidentDate       DateTime?
+  IncidentTime       String?             @db.VarChar(10)
+  IncidentAddress    String?             @db.Text
+  Latitude           Decimal?            @db.Decimal(10, 8)
+  Longitude          Decimal?            @db.Decimal(11, 8)
+  NatureOfOffence    String?             @db.Text
+  MO                 String?             @db.Text  // Modus Operandi
+  PropertyStolen     Boolean             @default(false)
+  PropertyValue      Decimal?            @db.Decimal(15, 2)
+  UsedVehicle        Boolean             @default(false)
+  UsedWeapon         Boolean             @default(false)
+  IsNightOffence     Boolean             @default(false)
+  Remarks            String?             @db.Text
+  CreatedAt          DateTime            @default(now())
+  UpdatedAt          DateTime            @updatedAt
+  DeletedAt          DateTime?
+
+  // Relations
+  Unit               Unit                @relation(fields: [UnitID], references: [UnitID], onDelete: Restrict)
+  CrimeHead          CrimeHead?          @relation(fields: [CrimeHeadID], references: [CrimeHeadID])
+  CrimeSubHead       CrimeSubHead?       @relation(fields: [CrimeSubHeadID], references: [CrimeSubHeadID])
+  Category           CaseCategory?       @relation(fields: [CategoryID], references: [CategoryID])
+  Gravity            GravityOffence?     @relation(fields: [GravityID], references: [GravityID])
+  Status             CaseStatusMaster?   @relation(fields: [StatusID], references: [StatusID])
+  InvestigatingOfficer Employee?         @relation("InvestigatingOfficer", fields: [InvestigatingOfficerID], references: [EmployeeID])
+
+  Complainants       ComplainantDetails[]
+  Victims            Victim[]
+  Accused            Accused[]
+  Arrests            ArrestSurrender[]
+  ChargeSheets       ChargesheetDetails[]
+
+  @@unique([UnitID, FIRNumber])
+  @@index([UnitID])
+  @@index([FIRDate])
+  @@index([CrimeHeadID])
+  @@index([StatusID])
+  @@index([DeletedAt])
+  @@map("case_master")
+}
+
+// ============================================================
+// COMPLAINANT
+// ============================================================
+
+model ComplainantDetails {
+  ComplainantID   Int              @id @default(autoincrement())
+  CaseID          Int
+  OccupationID    Int?
+  ReligionID      Int?
+  CasteID         Int?
+
+  Name            String           @db.VarChar(200)
+  FatherOrHusbandName String?      @db.VarChar(200)
+  Gender          String           @db.VarChar(10) // M/F/T
+  Age             Int?
+  DOB             DateTime?        @db.Date
+  Nationality     String?          @db.VarChar(50)
+  AadhaarNumber   String?          @db.VarChar(12)
+  PhoneNumber     String?          @db.VarChar(20)
+  Email           String?          @db.VarChar(150)
+  Address         String?          @db.Text
+  Latitude        Decimal?         @db.Decimal(10, 8)
+  Longitude       Decimal?         @db.Decimal(11, 8)
+  IsVictimToo     Boolean          @default(false)
+  StatementDate   DateTime?
+  Remarks         String?          @db.Text
+  CreatedAt       DateTime         @default(now())
+
+  Case            CaseMaster       @relation(fields: [CaseID], references: [CaseID], onDelete: Cascade)
+  Occupation      OccupationMaster? @relation(fields: [OccupationID], references: [OccupationID])
+  Religion        ReligionMaster?   @relation(fields: [ReligionID], references: [ReligionID])
+  Caste           CasteMaster?      @relation(fields: [CasteID], references: [CasteID])
+
+  @@index([CaseID])
+  @@map("complainant_details")
+}
+
+// ============================================================
+// VICTIM
+// ============================================================
+
+model Victim {
+  VictimID        Int              @id @default(autoincrement())
+  CaseID          Int
+  OccupationID    Int?
+  ReligionID      Int?
+  CasteID         Int?
+
+  Name            String           @db.VarChar(200)
+  FatherOrHusbandName String?      @db.VarChar(200)
+  Gender          String           @db.VarChar(10)
+  Age             Int?
+  DOB             DateTime?        @db.Date
+  Nationality     String?          @db.VarChar(50)
+  AadhaarNumber   String?          @db.VarChar(12)
+  PhoneNumber     String?          @db.VarChar(20)
+  Address         String?          @db.Text
+  InjuryType      String?          @db.VarChar(100) // Grievous, Simple, Fatal, None
+  InjuryDetails   String?          @db.Text
+  HospitalName    String?          @db.VarChar(200)
+  IsDead          Boolean          @default(false)
+  DeathDate       DateTime?
+  Remarks         String?          @db.Text
+  CreatedAt       DateTime         @default(now())
+
+  Case            CaseMaster       @relation(fields: [CaseID], references: [CaseID], onDelete: Cascade)
+  Occupation      OccupationMaster? @relation(fields: [OccupationID], references: [OccupationID])
+  Religion        ReligionMaster?   @relation(fields: [ReligionID], references: [ReligionID])
+  Caste           CasteMaster?      @relation(fields: [CasteID], references: [CasteID])
+
+  @@index([CaseID])
+  @@map("victims")
+}
+
+// ============================================================
+// ACCUSED
+// ============================================================
+
+model Accused {
+  AccusedID       Int              @id @default(autoincrement())
+  CaseID          Int
+  OccupationID    Int?
+  ReligionID      Int?
+  CasteID         Int?
+
+  Name            String           @db.VarChar(200)
+  Alias           String?          @db.VarChar(200)
+  FatherName      String?          @db.VarChar(200)
+  Gender          String           @db.VarChar(10)
+  Age             Int?
+  DOB             DateTime?        @db.Date
+  Nationality     String?          @db.VarChar(50)
+  AadhaarNumber   String?          @db.VarChar(12)
+  PhoneNumber     String?          @db.VarChar(20)
+  PermanentAddress String?         @db.Text
+  PresentAddress  String?          @db.Text
+  IsKnown         Boolean          @default(true)
+  IsAbsconding    Boolean          @default(false)
+  PhysicalDescription String?      @db.Text
+  PreviousCrimeHistory String?     @db.Text
+  Remarks         String?          @db.Text
+  CreatedAt       DateTime         @default(now())
+
+  Case            CaseMaster       @relation(fields: [CaseID], references: [CaseID], onDelete: Cascade)
+  Occupation      OccupationMaster? @relation(fields: [OccupationID], references: [OccupationID])
+  Religion        ReligionMaster?   @relation(fields: [ReligionID], references: [ReligionID])
+  Caste           CasteMaster?      @relation(fields: [CasteID], references: [CasteID])
+  Arrests         ArrestSurrender[]
+
+  @@index([CaseID])
+  @@map("accused")
+}
+
+// ============================================================
+// ARREST & SURRENDER
+// ============================================================
+
+model ArrestSurrender {
+  ArrestID        Int         @id @default(autoincrement())
+  CaseID          Int
+  AccusedID       Int
+  ArrestType      String      @db.VarChar(20) // ARREST, SURRENDER, NBW
+  ArrestDate      DateTime
+  ArrestPlace     String?     @db.VarChar(300)
+  ArrestingOfficer String?    @db.VarChar(200)
+  CourtName       String?     @db.VarChar(200)
+  RemandDate      DateTime?
+  BailDate        DateTime?
+  BailType        String?     @db.VarChar(50) // Regular, Anticipatory, Surety
+  Remarks         String?     @db.Text
+  CreatedAt       DateTime    @default(now())
+
+  Case            CaseMaster  @relation(fields: [CaseID], references: [CaseID], onDelete: Cascade)
+  Accused         Accused     @relation(fields: [AccusedID], references: [AccusedID], onDelete: Cascade)
+
+  @@index([CaseID])
+  @@index([AccusedID])
+  @@map("arrest_surrenders")
+}
+
+// ============================================================
+// CHARGESHEET & COURT
+// ============================================================
+
+model Court {
+  CourtID       Int                  @id @default(autoincrement())
+  CourtName     String               @db.VarChar(200)
+  CourtType     String               @db.VarChar(50) // Sessions, HC, Magistrate, POCSO, SC/ST
+  DistrictID    Int?
+  Address       String?              @db.Text
+  IsActive      Boolean              @default(true)
+  ChargeSheets  ChargesheetDetails[]
+
+  @@map("courts")
+}
+
+model ChargesheetDetails {
+  ChargesheetID       Int         @id @default(autoincrement())
+  CaseID              Int
+  CourtID             Int?
+  ChargesheetNumber   String?     @db.VarChar(50)
+  FilingDate          DateTime?
+  CCNumber            String?     @db.VarChar(50) // Calendar Case Number
+  TrialStatus         String?     @db.VarChar(100)
+  NextHearingDate     DateTime?
+  Verdict             String?     @db.VarChar(100) // Convicted, Acquitted, Pending, Compounded
+  VerdictDate         DateTime?
+  SentenceDetails     String?     @db.Text
+  Remarks             String?     @db.Text
+  CreatedAt           DateTime    @default(now())
+  UpdatedAt           DateTime    @updatedAt
+
+  Case                CaseMaster  @relation(fields: [CaseID], references: [CaseID], onDelete: Cascade)
+  Court               Court?      @relation(fields: [CourtID], references: [CourtID])
+
+  @@index([CaseID])
+  @@map("chargesheet_details")
+}
+
+// ============================================================
+// COMPLAINT MANAGEMENT MODULE
+// ============================================================
+
+model Complaint {
+  ComplaintID        Int               @id @default(autoincrement())
+  ComplaintNumber    String            @unique @db.VarChar(30)
+  DistrictID         Int?
+  PoliceStationID    Int?
+  AssignedOfficerID  Int?
+
+  // Citizen Info
+  CitizenName        String            @db.VarChar(200)
+  PhoneNumber        String            @db.VarChar(20)
+  Email              String?           @db.VarChar(150)
+  Gender             String?           @db.VarChar(10)
+  Age                Int?
+
+  // Incident Details
+  IncidentDate       DateTime?
+  IncidentAddress    String?           @db.Text
+  Latitude           Decimal?          @db.Decimal(10, 8)
+  Longitude          Decimal?          @db.Decimal(11, 8)
+
+  // Complaint Content
+  ComplaintCategory  String            @db.VarChar(100)
+  Subject            String            @db.VarChar(500)
+  Description        String            @db.Text
+  Priority           ComplaintPriority @default(NORMAL)
+  Status             ComplaintStatus   @default(DRAFT)
+
+  Remarks            String?           @db.Text
+  CreatedAt          DateTime          @default(now())
+  UpdatedAt          DateTime          @updatedAt
+  DeletedAt          DateTime?
+
+  // Relations
+  District           District?         @relation(fields: [DistrictID], references: [DistrictID])
+  PoliceStation      Unit?             @relation(fields: [PoliceStationID], references: [UnitID])
+  AssignedOfficer    Employee?         @relation(fields: [AssignedOfficerID], references: [EmployeeID])
+  StatusHistory      ComplaintStatusHistory[]
+  EvidenceFiles      ComplaintEvidence[]
+
+  @@index([DistrictID])
+  @@index([Status])
+  @@index([Priority])
+  @@index([CreatedAt])
+  @@index([DeletedAt])
+  @@map("complaints")
+}
+
+enum ComplaintPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+enum ComplaintStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  ASSIGNED
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+  REJECTED
+}
+
+model ComplaintStatusHistory {
+  HistoryID     Int             @id @default(autoincrement())
+  ComplaintID   Int
+  FromStatus    ComplaintStatus?
+  ToStatus      ComplaintStatus
+  ChangedBy     String          @db.VarChar(200)
+  Remarks       String?         @db.Text
+  ChangedAt     DateTime        @default(now())
+
+  Complaint     Complaint       @relation(fields: [ComplaintID], references: [ComplaintID], onDelete: Cascade)
+
+  @@index([ComplaintID])
+  @@map("complaint_status_history")
+}
+
+model ComplaintEvidence {
+  EvidenceID     Int       @id @default(autoincrement())
+  ComplaintID    Int
+  FileName       String    @db.VarChar(255)
+  OriginalName   String    @db.VarChar(255)
+  MimeType       String    @db.VarChar(100)
+  FileSize       BigInt
+  StoragePath    String    @db.VarChar(500)
+  UploadedAt     DateTime  @default(now())
+
+  Complaint      Complaint @relation(fields: [ComplaintID], references: [ComplaintID], onDelete: Cascade)
+
+  @@index([ComplaintID])
+  @@map("complaint_evidence")
+}
+
+// ============================================================
+// EXCEL IMPORT / INGESTION
+// ============================================================
+
+model ExcelImportBatch {
+  BatchID          Int                @id @default(autoincrement())
+  FileName         String             @db.VarChar(255)
+  OriginalName     String             @db.VarChar(255)
+  FileSizeBytes    BigInt
+  MimeType         String             @db.VarChar(100)
+  StoragePath      String             @db.VarChar(500)
+  ImportedBy       String             @db.VarChar(200)
+  Status           ImportStatus       @default(PENDING)
+  TotalRows        Int                @default(0)
+  ValidRows        Int                @default(0)
+  InvalidRows      Int                @default(0)
+  DuplicateRows    Int                @default(0)
+  InsertedRows     Int                @default(0)
+  SkippedRows      Int                @default(0)
+  ErrorMessage     String?            @db.Text
+  StartedAt        DateTime?
+  CompletedAt      DateTime?
+  CreatedAt        DateTime           @default(now())
+  IsReImport       Boolean            @default(false)
+  OriginalBatchID  Int?
+
+  Logs             ExcelImportLog[]
+
+  @@index([Status])
+  @@index([CreatedAt])
+  @@map("excel_import_batches")
+}
+
+enum ImportStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  PARTIALLY_COMPLETED
+  FAILED
+  ROLLED_BACK
+}
+
+model ExcelImportLog {
+  LogID         Int              @id @default(autoincrement())
+  BatchID       Int
+  RowNumber     Int?
+  SheetName     String?          @db.VarChar(100)
+  LogLevel      LogLevel         @default(INFO)
+  Message       String           @db.Text
+  RawData       String?          @db.Text
+  CreatedAt     DateTime         @default(now())
+
+  Batch         ExcelImportBatch @relation(fields: [BatchID], references: [BatchID], onDelete: Cascade)
+
+  @@index([BatchID])
+  @@index([LogLevel])
+  @@map("excel_import_logs")
+}
+
+enum LogLevel {
+  INFO
+  WARNING
+  ERROR
+  SUCCESS
+}
+
+// ============================================================
+// AI KNOWLEDGE REPOSITORY
+// ============================================================
+
+model KnowledgeRecord {
+  RecordID      Int       @id @default(autoincrement())
+  SourceFile    String    @db.VarChar(255)
+  RecordType    String    @db.VarChar(100) // DISTRICT_STATS, IPC_HEAD, SLL_HEAD, etc.
+  District      String?   @db.VarChar(100)
+  Category      String?   @db.VarChar(150)
+  SubCategory   String?   @db.VarChar(150)
+  Year          Int?
+  Month         Int?
+  Count         Int?
+  YtdCount      Int?
+  PrevYearCount Int?
+  Tags          String[]
+  RawText       String    @db.Text
+  CreatedAt     DateTime  @default(now())
+  UpdatedAt     DateTime  @updatedAt
+
+  @@index([RecordType])
+  @@index([District])
+  @@index([Year, Month])
+  @@map("knowledge_records")
+}
